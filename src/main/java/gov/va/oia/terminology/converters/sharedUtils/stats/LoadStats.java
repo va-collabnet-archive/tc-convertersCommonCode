@@ -26,6 +26,11 @@ public class LoadStats
 		concepts_++;
 	}
 	
+	public int getConceptCount()
+	{
+		return concepts_;
+	}
+	
 	public void addDescription(String descName)
 	{
 		increment(descriptions_, descName);
