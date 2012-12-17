@@ -71,6 +71,16 @@ public class EConceptUtility
 		ConverterUUID.addMapping("Fully Specified Name", fullySpecifiedNameUuid_);
 		ConverterUUID.addMapping("US English Refset", usEnRefsetUuid_);
 	}
+	
+	/**
+	 * Create a concept, automatically setting as many fields as possible (adds a description, calculates
+	 * the UUID, status current, etc)
+	 */
+	public EConcept createConcept(String preferredDescription)
+	{
+		return createConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + preferredDescription).getBytes()),
+				preferredDescription, null);
+	}
 
 	/**
 	 * Create a concept, automatically setting as many fields as possible (adds a description, calculates
@@ -80,6 +90,16 @@ public class EConceptUtility
 	{
 		return createConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + conceptPrimordialUuidOrigin).getBytes()),
 				preferredDescription, null);
+	}
+	
+	/**
+	 * Create a concept, link it to a parent via is_a, setting as many fields as possible automatically.
+	 */
+	public EConcept createConcept(String name, UUID parentConceptPrimordial) 
+	{
+		EConcept concept = createConcept(name);
+		addRelationship(concept, parentConceptPrimordial, null, null);
+		return concept;
 	}
 	
 	/**
