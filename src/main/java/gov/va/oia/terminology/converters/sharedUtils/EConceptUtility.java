@@ -13,7 +13,9 @@ import org.dwfa.cement.ArchitectonicAuxiliary;
 import org.dwfa.cement.RefsetAuxiliary;
 import org.ihtsdo.etypes.EConcept;
 import org.ihtsdo.etypes.EConceptAttributes;
+import org.ihtsdo.etypes.EIdentifierLong;
 import org.ihtsdo.etypes.EIdentifierString;
+import org.ihtsdo.etypes.EIdentifierUuid;
 import org.ihtsdo.tk.binding.snomed.SnomedMetadataRf2;
 import org.ihtsdo.tk.dto.concept.component.TkComponent;
 import org.ihtsdo.tk.dto.concept.component.TkRevision;
@@ -235,7 +237,7 @@ public class EConceptUtility
 		return description;
 	}
 
-	public EIdentifierString addAdditionalIds(EConcept eConcept, Object id, UUID idTypeUuid, boolean retired)
+	public TkIdentifier addAdditionalIds(EConcept eConcept, Object id, UUID idTypeUuid, boolean retired)
 	{
 		if (id != null)
 		{
@@ -247,7 +249,23 @@ public class EConceptUtility
 			}
 
 			// create the identifier and add it to the additional ids list
-			EIdentifierString cid = new EIdentifierString();
+			TkIdentifier cid;
+			if (id instanceof String)
+			{
+			    cid = new EIdentifierString();
+			}
+			else if (id instanceof Long)
+			{
+			    cid = new EIdentifierLong();
+			}
+			else if (id instanceof UUID)
+			{
+			    cid = new EIdentifierUuid();
+			}
+			else
+			{
+			    throw new RuntimeException("Unsupported identifier type - must be String, Long or UUID");
+			}
 			additionalIds.add(cid);
 
 			// populate the type
@@ -259,13 +277,13 @@ public class EConceptUtility
 			setRevisionAttributes(cid, (retired ? statusRetiredUuid_ : statusCurrentUuid_), eConcept
 					.getConceptAttributes().getTime());
 
-			ls_.addId(getOriginStringForUuid(idTypeUuid));
+			ls_.addConceptId(getOriginStringForUuid(idTypeUuid));
 			return cid;
 		}
 		return null;
 	}
 	
-	public EIdentifierString addAdditionalIds(TkComponent<?> component, Object id, UUID idTypeUuid)
+	public TkIdentifier addAdditionalIds(TkComponent<?> component, Object id, UUID idTypeUuid)
     {
         if (id != null)
         {
@@ -277,7 +295,23 @@ public class EConceptUtility
             }
 
             // create the identifier and add it to the additional ids list
-            EIdentifierString cid = new EIdentifierString();
+            TkIdentifier cid;
+            if (id instanceof String)
+            {
+                cid = new EIdentifierString();
+            }
+            else if (id instanceof Long)
+            {
+                cid = new EIdentifierLong();
+            }
+            else if (id instanceof UUID)
+            {
+                cid = new EIdentifierUuid();
+            }
+            else
+            {
+                throw new RuntimeException("Unsupported identifier type - must be String, Long or UUID");
+            }
             additionalIds.add(cid);
 
             // populate the type
@@ -287,8 +321,18 @@ public class EConceptUtility
             cid.setDenotation(id);
 
             setRevisionAttributes(cid, statusCurrentUuid_, component.getTime());
+            
+            String label;
+            if (component instanceof TkDescription)
+            {
+                label = "Description";
+            }
+            else
+            {
+                label = component.getClass().getSimpleName();
+            }
 
-            ls_.addId(getOriginStringForUuid(idTypeUuid));
+            ls_.addComponentId(label, getOriginStringForUuid(idTypeUuid));
             return cid;
         }
         return null;

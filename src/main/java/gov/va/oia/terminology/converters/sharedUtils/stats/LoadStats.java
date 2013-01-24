@@ -14,9 +14,8 @@ public class LoadStats
 {
 	private int concepts_ = 0;
 	private TreeMap<String, Integer> descriptions_ = new TreeMap<String, Integer>();
-	private TreeMap<String, Integer> ids_ = new TreeMap<String, Integer>();
-	private TreeMap<String, Integer> subsets_ = new TreeMap<String, Integer>();
-	private TreeMap<String, Integer> subsetMembers_ = new TreeMap<String, Integer>();
+	private TreeMap<String, Integer> conceptIds_ = new TreeMap<String, Integer>();
+	private TreeMap<String, TreeMap<String, Integer>> componentIds_ = new TreeMap<String, TreeMap<String, Integer>>();
 	private TreeMap<String, Integer> refsetMembers_ = new TreeMap<String, Integer>();
 	private TreeMap<String, Integer> relationships_ = new TreeMap<String, Integer>();
 	private TreeMap<String, TreeMap<String, Integer>> annotations_ = new TreeMap<String, TreeMap<String, Integer>>();
@@ -36,20 +35,15 @@ public class LoadStats
 		increment(descriptions_, descName);
 	}
 	
-	public void addId(String idName)
+	public void addConceptId(String idName)
 	{
-		increment(ids_, idName);
+		increment(conceptIds_, idName);
 	}
 	
-	public void addSubset(String subsetItemName)
-	{
-		increment(subsets_, subsetItemName);
-	}
-	
-	public void addSubsetMember(String subset)
-	{
-		increment(subsetMembers_, subset);
-	}
+	public void addComponentId(String annotatedItem, String annotationName)
+    {
+        increment(componentIds_, annotatedItem, annotationName);
+    }
 	
 	public void addAnnotation(String annotatedItem, String annotationName)
 	{
@@ -81,28 +75,30 @@ public class LoadStats
 		result.add("Relationships Total: " + sum);
 		
 		sum = 0;
-		for (Map.Entry<String, Integer> value : ids_.entrySet())
+		for (Map.Entry<String, Integer> value : conceptIds_.entrySet())
 		{
 			sum += value.getValue();
-			result.add("ID '" + value.getKey() + "': " + value.getValue());
+			result.add("Concept ID '" + value.getKey() + "': " + value.getValue());
 		}
-		result.add("IDs Total: " + sum);
+		result.add("Concept IDs Total: " + sum);
 		
 		sum = 0;
-		for (Map.Entry<String, Integer> value : subsets_.entrySet())
-		{
-			sum += value.getValue();
-			result.add("Subset '" + value.getKey() + "': " + value.getValue());
-		}
-		result.add("Subsets Total: " + sum);
-		
-		sum = 0;
-		for (Map.Entry<String, Integer> value : subsetMembers_.entrySet())
-		{
-			sum += value.getValue();
-			result.add("Subset Members '" + value.getKey() + "': " + value.getValue());
-		}
-		result.add("Subset Members Total: " + sum);
+        int nestedSum = 0;
+        for (Map.Entry<String, TreeMap<String, Integer>> value : componentIds_.entrySet())
+        {
+            nestedSum = 0;
+            for (Map.Entry<String, Integer> nestedValue : value.getValue().entrySet())
+            {
+                result.add("Component ID '" + value.getKey() + ":" + nestedValue.getKey() + "': " + nestedValue.getValue());
+                nestedSum += nestedValue.getValue();
+            }
+            sum += nestedSum;
+            if (value.getValue().size() > 1)
+            {
+                result.add("Component ID '" + value.getKey() + "' Total: " + nestedSum);
+            }
+        }
+        result.add("Component IDs Total: " + sum);
 		
 		sum = 0;
 		for (Map.Entry<String, Integer> value : descriptions_.entrySet())
@@ -113,7 +109,7 @@ public class LoadStats
 		result.add("Descriptions Total: " + sum);
 		
 		sum = 0;
-		int nestedSum = 0;
+		nestedSum = 0;
 		for (Map.Entry<String, TreeMap<String, Integer>> value : annotations_.entrySet())
 		{
 			nestedSum = 0;
