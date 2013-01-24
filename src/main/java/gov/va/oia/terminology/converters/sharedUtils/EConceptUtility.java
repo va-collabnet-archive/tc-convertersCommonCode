@@ -264,6 +264,35 @@ public class EConceptUtility
 		}
 		return null;
 	}
+	
+	public EIdentifierString addAdditionalIds(TkComponent<?> component, Object id, UUID idTypeUuid)
+    {
+        if (id != null)
+        {
+            List<TkIdentifier> additionalIds = component.getAdditionalIdComponents();
+            if (additionalIds == null)
+            {
+                additionalIds = new ArrayList<TkIdentifier>();
+                component.setAdditionalIdComponents(additionalIds);
+            }
+
+            // create the identifier and add it to the additional ids list
+            EIdentifierString cid = new EIdentifierString();
+            additionalIds.add(cid);
+
+            // populate the type
+            cid.setAuthorityUuid(idTypeUuid);
+
+            // populate the actual value of the identifier
+            cid.setDenotation(id);
+
+            setRevisionAttributes(cid, statusCurrentUuid_, component.getTime());
+
+            ls_.addId(getOriginStringForUuid(idTypeUuid));
+            return cid;
+        }
+        return null;
+    }
 
 	/**
 	 * Generated the UUID, uses the concept time
