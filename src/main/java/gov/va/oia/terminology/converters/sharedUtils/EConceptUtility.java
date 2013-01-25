@@ -468,9 +468,18 @@ public class EConceptUtility
 	}
 	
 	/**
+     * @param time = if null, set to refsetConcept time
+     */
+    public TkRefexUuidMember addRefsetMember(EConcept refsetConcept, UUID targetUuid, boolean active, Long time)
+    {
+        return addRefsetMember(refsetConcept, targetUuid, 
+                ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "refsetItem:" + refsetMemberUnique_++).getBytes()), active, time);
+    }
+	
+	/**
 	 * @param time = if null, set to refsetConcept time
 	 */
-	public TkRefexUuidMember addRefsetMember(EConcept refsetConcept, UUID memberUuid, boolean active, Long time)
+	public TkRefexUuidMember addRefsetMember(EConcept refsetConcept, UUID targetUuid, UUID refsetMemberPrimordial, boolean active, Long time)
 	{
 		List<TkRefexAbstractMember<?>> refsetMembers = refsetConcept.getRefsetMembers();
 		if (refsetMembers == null)
@@ -479,8 +488,8 @@ public class EConceptUtility
 			refsetConcept.setRefsetMembers(refsetMembers);
 		}
 		TkRefexUuidMember refsetMember = new TkRefexUuidMember();
-		refsetMember.setPrimordialComponentUuid(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "refsetItem:" + refsetMemberUnique_++).getBytes()));
-		refsetMember.setComponentUuid(memberUuid);  //ComponentUuid and refsetUuid seem like they are reversed at first glance, but this is right.
+		refsetMember.setPrimordialComponentUuid(refsetMemberPrimordial);
+		refsetMember.setComponentUuid(targetUuid);  //ComponentUuid and refsetUuid seem like they are reversed at first glance, but this is right.
 		refsetMember.setRefsetUuid(refsetConcept.getPrimordialUuid());  
 		refsetMember.setUuid1(refsetMemberTypeUuid_);
 		setRevisionAttributes(refsetMember, (active ? statusCurrentUuid_ : statusRetiredUuid_), 
