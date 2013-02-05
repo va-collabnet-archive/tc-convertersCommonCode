@@ -1,7 +1,9 @@
 package gov.va.oia.terminology.converters.sharedUtils.propertyTypes;
 
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,11 +18,11 @@ import java.util.UUID;
 
 public abstract class PropertyType
 {
+    protected static int srcVersion_ = 1;
 	private String propertyTypeDescription_;
-	private Set<String> propertyNames_;
 	private String uuidRoot_;
-	private HashSet<String> disabledTypes_ = new HashSet<String>();
-	protected static int srcVersion_ = 1;
+	
+	private Map<String, Property> properties_;
 	
 	public static void setSourceVersion(int version)
 	{
@@ -29,89 +31,90 @@ public abstract class PropertyType
 	
 	protected PropertyType(String propertyTypeDescription, String uuidRoot)
 	{
-		this.propertyNames_ = new HashSet<String>();
+		this.properties_ = new HashMap<String, Property>();
 		this.propertyTypeDescription_ = propertyTypeDescription;
 		this.uuidRoot_ = uuidRoot;
 	}
 	
-	public UUID getPropertyUUID(String propertyName)
+	public UUID getPropertyTypeUUID()
+    {
+        return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_).getBytes());
+    }
+    
+    public String getPropertyTypeDescription()
+    {
+        return propertyTypeDescription_;
+    }
+	
+	protected UUID getPropertyUUID(String propertyName)
 	{
 		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_ + ":" + propertyName).getBytes());
 	}
 	
-	public UUID getPropertyTypeUUID()
+	public Property getProperty(String propertyName)
 	{
-		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_).getBytes());
-	}
-	
-	public String getPropertyTypeDescription()
-	{
-		return propertyTypeDescription_;
+	    return properties_.get(propertyName);
 	}
 	
 	public Set<String> getPropertyNames()
 	{
-		return propertyNames_;
+		return properties_.keySet();
 	}
+	
+	public Collection<Property> getProperties()
+    {
+        return properties_.values();
+    }
 	
 	public boolean containsProperty(String propertyName)
 	{
-		return propertyNames_.contains(propertyName);
+		return properties_.containsKey(propertyName);
 	}
 	
-	/**
-	 * Only adds the property if the version of the data file falls between min and max, inclusive.
-	 * pass 0 in min or max to specify no min or no max, respectively
-	 */
-	public void addPropertyName(String propertyName, int minVersion, int maxVersion)
+	public Property addProperty(Property property)
 	{
-		if ((minVersion != 0 && srcVersion_ < minVersion) 
-				|| (maxVersion != 0 && srcVersion_ > maxVersion)) 
-		{
-			return;
-		}
-		propertyNames_.add(propertyName);
+	    property.setOwner(this);
+	    properties_.put(property.getSourcePropertyName(), property);
+	    return property;
 	}
-	
-	public void addPropertyName(String propertyName)
-	{
-		propertyNames_.add(propertyName);
-	}
-	
-	public void addDisabledPropertyName(String propertyName)
-	{
-		propertyNames_.add(propertyName);
-		disabledTypes_.add(propertyName);
-	}
-	
-	/**
-	 * Only adds the property if the version of the data file falls between min and max, inclusive.
-	 * pass 0 in min or max to specify no min or no max, respectively
-	 */
-	public void addDisabledPropertyName(String propertyName, int minVersion, int maxVersion)
-	{
-		if ((minVersion != 0 && srcVersion_ < minVersion) 
-				|| (maxVersion != 0 && srcVersion_ > maxVersion)) 
-		{
-			return;
-		}
-		propertyNames_.add(propertyName);
-		disabledTypes_.add(propertyName);
 		
-	}
-	
-	public boolean isDisabled(String propertyName)
+	public Property addProperty(String propertyName)
 	{
-		return disabledTypes_.contains(propertyName);
+	    return addProperty(propertyName, propertyName, false);
 	}
 	
+	public Property addProperty(String sourcePropertyName, String sourcePropertyDescription)
+    {
+	    return addProperty(sourcePropertyName, sourcePropertyDescription, false);
+    }
+	
+	public Property addProperty(String sourcePropertyName, String sourcePropertyDescription, boolean disabled)
+    {
+	    Property property = new Property(this, sourcePropertyName, sourcePropertyDescription, disabled);
+        properties_.put(sourcePropertyName, property);
+        return property;
+    }
 	
 	/**
-	 * Default impl just returns what they passed in.  Real implementing classes may choose to override this.
-	 */
-	public String getPropertyFriendlyName(String propertyName)
-	{
-		return propertyName;
-	}
+     * Only adds the property if the version of the data file falls between min and max, inclusive.
+     * pass 0 in min or max to specify no min or no max, respectively
+     */
+    public Property addProperty(String propertyName, int minVersion, int maxVersion)
+    {
+        return addProperty(propertyName, propertyName, minVersion, maxVersion, false);
+    }
 	
+	/**
+	 * Only adds the property if the version of the data file falls between min and max, inclusive.
+	 * pass 0 in min or max to specify no min or no max, respectively
+	 */
+	public Property addProperty(String sourcePropertyName, String sourcePropertyDescription, int minVersion, int maxVersion, boolean disabled)
+	{
+		if ((minVersion != 0 && srcVersion_ < minVersion) 
+				|| (maxVersion != 0 && srcVersion_ > maxVersion)) 
+		{
+		    return null;
+		}
+		return addProperty(sourcePropertyName, sourcePropertyDescription, disabled);
+	}
 }

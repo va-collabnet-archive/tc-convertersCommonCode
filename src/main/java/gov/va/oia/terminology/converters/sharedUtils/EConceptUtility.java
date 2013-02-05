@@ -1,6 +1,8 @@
 package gov.va.oia.terminology.converters.sharedUtils;
 
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Refsets;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import gov.va.oia.terminology.converters.sharedUtils.stats.LoadStats;
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import org.dwfa.ace.refset.ConceptConstants;
 import org.dwfa.cement.ArchitectonicAuxiliary;
 import org.dwfa.cement.RefsetAuxiliary;
 import org.ihtsdo.etypes.EConcept;
@@ -51,6 +54,8 @@ public class EConceptUtility
 	public final UUID isARelUuid_ = ArchitectonicAuxiliary.Concept.IS_A_REL.getPrimoridalUid();
 	public final UUID moduleUuid_ = TkRevision.unspecifiedModuleUuid;
 	public final UUID refsetMemberTypeUuid_ = RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid();
+	public final String VA_REFSET_NAME = "VA Refsets";
+	public final UUID VA_REFSET_UUID = ConverterUUID.nameUUIDFromBytes(("gov.va.med.term.refset." + VA_REFSET_NAME).getBytes());
 
 	private final String lang_ = "en";
 
@@ -81,7 +86,7 @@ public class EConceptUtility
 	public EConcept createConcept(String preferredDescription)
 	{
 		return createConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + preferredDescription).getBytes()),
-				preferredDescription, null);
+				preferredDescription);
 	}
 
 	/**
@@ -91,7 +96,7 @@ public class EConceptUtility
 	public EConcept createConcept(String conceptPrimordialUuidOrigin, String preferredDescription)
 	{
 		return createConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + conceptPrimordialUuidOrigin).getBytes()),
-				preferredDescription, null);
+				preferredDescription);
 	}
 	
 	/**
@@ -105,14 +110,22 @@ public class EConceptUtility
 	}
 	
 	/**
+     * Create a concept, link it to a parent via is_a, setting as many fields as possible automatically.
+     */
+    public EConcept createConcept(UUID primordial, String name, UUID relParentPrimordial) 
+    {
+        EConcept concept = createConcept(primordial, name);
+        addRelationship(concept, relParentPrimordial, null, null);
+        return concept;
+    }
+	
+	/**
 	 * Create a concept, automatically setting as many fields as possible (adds a description (en US)
 	 * status current, etc
-	 * 
-	 * @param time - set to now if null
 	 */
-	public EConcept createConcept(UUID conceptPrimordialUuid, String preferredDescription, Long time)
+	public EConcept createConcept(UUID conceptPrimordialUuid, String preferredDescription)
 	{
-		return createConcept(conceptPrimordialUuid, preferredDescription, time, statusCurrentUuid_);
+		return createConcept(conceptPrimordialUuid, preferredDescription, null, statusCurrentUuid_);
 	}
 
 	/**
@@ -145,6 +158,17 @@ public class EConceptUtility
 		eConcept.setConceptAttributes(conceptAttributes);
 		ls_.addConcept();
 		return eConcept;
+	}
+	
+	
+	/**
+	 * Create a concept with a UUID set from "gov.va.refset.VA Refsets" (VA_REFSET_UUID)  and a name of "VA Refsets" (VA_REFSET_NAME)
+	 * nested under ConceptConstants.REFSET
+	 */
+	public EConcept createVARefsetRootConcept()
+	{
+	    return createConcept(VA_REFSET_UUID, VA_REFSET_NAME, 
+                ConceptConstants.REFSET.getUuids()[0]);
 	}
 
 	/**
@@ -400,20 +424,20 @@ public class EConceptUtility
 
 	/**
 	 * Generates the UUID, uses the component time
-	 * @param value - if value is null, it uses RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid()
+	 * @param valueConcept - if value is null, it uses RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid()
 	 */
-	public TkRefexUuidMember addUuidAnnotation(TkComponent<?> component, UUID value, UUID refsetUuid)
+	public TkRefexUuidMember addUuidAnnotation(TkComponent<?> component, UUID valueConcept, UUID refsetUuid)
 	{
 		return addUuidAnnotation(component,
 				ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "uuidAnnotation:" + uuidAnnotationUnique_++).getBytes()),
-				value, refsetUuid, false, null);
+				valueConcept, refsetUuid, false, null);
 	}
 
 	/**
 	 * @param time - If time is null, uses the component time.
-	 * @param value - if value is null, it uses RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid()
+	 * @param valueConcept - if value is null, it uses RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid()
 	 */
-	public TkRefexUuidMember addUuidAnnotation(TkComponent<?> component, UUID annotationPrimordialUuid, UUID value,
+	public TkRefexUuidMember addUuidAnnotation(TkComponent<?> component, UUID annotationPrimordialUuid, UUID valueConcept,
 			UUID refsetUuid, boolean retired, Long time)
 	{
 		List<TkRefexAbstractMember<?>> annotations = component.getAnnotations();
@@ -429,7 +453,7 @@ public class EConceptUtility
 
 		conceptRefexMember.setComponentUuid(component.getPrimordialComponentUuid());
 		conceptRefexMember.setPrimordialComponentUuid(annotationPrimordialUuid);
-		conceptRefexMember.setUuid1(value == null ? refsetMemberTypeUuid_ : value);
+		conceptRefexMember.setUuid1(valueConcept == null ? refsetMemberTypeUuid_ : valueConcept);
 		conceptRefexMember.setRefsetUuid(refsetUuid);
 		setRevisionAttributes(conceptRefexMember, (retired ? statusRetiredUuid_ : statusCurrentUuid_),
 				(time == null ? component.getTime() : time));
@@ -500,6 +524,17 @@ public class EConceptUtility
 		
 		return refsetMember;
 	}
+	
+	/**
+     * Add an IS_A_REL relationship, with the time set to now.
+     * 
+     */
+    public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid)
+    {
+        return addRelationship(eConcept,
+                ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid,
+                null, null);
+    }
 
 	/**
 	 * Add a relationship. The source of the relationship is assumed to be the specified concept. The UUID of the
@@ -587,13 +622,42 @@ public class EConceptUtility
 		ls_ = new LoadStats();
 	}
 	
+	
+	
+	/**
+     * Utility method to build and store a metadata concept.
+     */
+    public EConcept createAndStoreMetaDataConcept(String name, UUID relParentPrimordial, DataOutputStream dos) throws Exception
+    {
+        return createAndStoreMetaDataConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + name).getBytes()),
+                name, null, relParentPrimordial, null, dos);
+    }
+	
+	/**
+     * Utility method to build and store a metadata concept.
+     */
+    public EConcept createAndStoreMetaDataConcept(UUID primordial, String name, UUID relParentPrimordial, DataOutputStream dos) throws Exception
+    {
+        return createAndStoreMetaDataConcept(primordial, name, null, relParentPrimordial, null, dos);
+    }
+	
 	/**
 	 * Utility method to build and store a metadata concept.
+	 * @param secondParent - optional
 	 */
-	public EConcept createAndStoreMetaDataConcept(UUID primordial, String name, UUID relParentPrimordial, DataOutputStream dos) throws Exception
+	public EConcept createAndStoreMetaDataConcept(UUID primordial, String name, String synonym, UUID relParentPrimordial, 
+	        UUID secondParent, DataOutputStream dos) throws Exception
 	{
-		EConcept concept = createConcept(primordial, name, null);
-		addRelationship(concept, relParentPrimordial, null, null);
+		EConcept concept = createConcept(primordial, name);
+		addRelationship(concept, relParentPrimordial);
+		if (secondParent != null)
+		{
+		    addRelationship(concept, secondParent);
+		}
+		if (synonym != null)
+		{
+		    addSynonym(concept, synonym, false, null);
+		}
 		concept.writeExternal(dos);
 		return concept;
 	}
@@ -617,9 +681,24 @@ public class EConceptUtility
 				continue;
 			}
 			createAndStoreMetaDataConcept(pt.getPropertyTypeUUID(), pt.getPropertyTypeDescription(), parentPrimordial, dos);
-			for (String type : pt.getPropertyNames())
+			UUID secondParent = null;
+			if (pt instanceof BPT_Refsets)
 			{
-				createAndStoreMetaDataConcept(pt.getPropertyUUID(type), pt.getPropertyFriendlyName(type), pt.getPropertyTypeUUID(), dos);
+			    secondParent = ((BPT_Refsets)pt).getRefsetIdentityParent();
+			}
+			for (Property p : pt.getProperties())
+			{
+			    if (p.getUseSrcDescriptionForFSN() && p.getSourcePropertyDescription() != null)
+			    {
+			        //inverse descriptions
+			        createAndStoreMetaDataConcept(p.getUUID(), p.getSourcePropertyDescription(), p.getSourcePropertyName(), pt.getPropertyTypeUUID(), 
+			                secondParent, dos);
+			    }
+			    else
+			    {
+			        createAndStoreMetaDataConcept(p.getUUID(), p.getSourcePropertyName(), p.getSourcePropertyDescription(), pt.getPropertyTypeUUID(), 
+			                secondParent, dos);
+			    }
 			}
 		}
 	}

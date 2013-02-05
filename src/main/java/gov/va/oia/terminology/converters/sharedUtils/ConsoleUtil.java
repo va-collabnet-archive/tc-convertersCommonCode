@@ -4,6 +4,7 @@ public class ConsoleUtil
 {
 	private static int lastStatus;
 	private static boolean progressLine = false;
+	private static int printsSinceReturn = 0;
 	private static boolean progressLineUsed = false;
 	public static boolean disableFancy = (System.console() == null);
 	
@@ -37,10 +38,17 @@ public class ConsoleUtil
 		if (!progressLine)
 		{
 			System.out.println();
+			printsSinceReturn = 0;
 		}
 		if (disableFancy)
 		{
 			System.out.print(".");
+			printsSinceReturn++;
+			if (printsSinceReturn >= 75)
+			{
+			    System.out.println();
+			    printsSinceReturn = 0;
+			}
 		}
 		else
 		{
@@ -59,6 +67,7 @@ public class ConsoleUtil
 				if (progressLineUsed)
 				{
 					System.out.println();
+					printsSinceReturn = 0;
 				}
 			}
 			else
@@ -79,6 +88,7 @@ public class ConsoleUtil
 				if (progressLineUsed)
 				{
 					System.out.println();
+					printsSinceReturn = 0;
 				}
 			}
 			else
@@ -100,6 +110,7 @@ public class ConsoleUtil
 				if (progressLineUsed)
 				{
 					System.out.println();
+					printsSinceReturn = 0;
 				}
 			}
 			else
@@ -109,6 +120,7 @@ public class ConsoleUtil
 			progressLine = false;
 		}
 		System.err.println(string);
+		printsSinceReturn = 0;
 		progressLine = true;
 		progressLineUsed = false;
 	}

@@ -59,6 +59,10 @@ public class ConverterUUID
 	 */
 	public static String getUUIDCreationString(UUID uuid)
 	{
+	    if (uuid == null)
+	    {
+	        return null;
+	    }
 		return masterUUIDMap_.get(uuid);
 	}
 	
