@@ -38,7 +38,10 @@ public class ConverterUUID
 	public static UUID nameUUIDFromBytes(byte[] name)
 	{
 		UUID uuid = UUID.nameUUIDFromBytes(name);
-		masterUUIDMap_.put(uuid, new String(name));
+		if (null != masterUUIDMap_.put(uuid, new String(name)))
+		{
+			throw new RuntimeException("Just made a duplicate UUID!");
+		}
 		return uuid;
 	}
 
