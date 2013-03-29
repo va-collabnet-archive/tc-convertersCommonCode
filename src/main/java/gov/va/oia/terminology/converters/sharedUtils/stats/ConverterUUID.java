@@ -16,6 +16,7 @@ import java.util.UUID;
 
 public class ConverterUUID
 {
+	public static boolean enableDupeUUIDException = true;
 	private static Hashtable<UUID, String> masterUUIDMap_ = new Hashtable<UUID, String>();
 
 	/**
@@ -38,9 +39,10 @@ public class ConverterUUID
 	public static UUID nameUUIDFromBytes(byte[] name)
 	{
 		UUID uuid = UUID.nameUUIDFromBytes(name);
-		if (null != masterUUIDMap_.put(uuid, new String(name)))
+		String putResult = masterUUIDMap_.put(uuid, new String(name));
+		if (enableDupeUUIDException && putResult != null)
 		{
-			throw new RuntimeException("Just made a duplicate UUID!");
+			throw new RuntimeException("Just made a duplicate UUID! '" + new String(name) + "' -> " + uuid);
 		}
 		return uuid;
 	}

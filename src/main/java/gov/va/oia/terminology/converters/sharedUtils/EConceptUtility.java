@@ -205,6 +205,19 @@ public class EConceptUtility
 		addUuidAnnotation(d, (preferred ? synonymPreferredUuid_ : synonymAcceptableUuid_), (languageRefsetUuid == null ? usEnRefsetUuid_ : languageRefsetUuid));
 		return d;
 	}
+	
+	/**
+	 * Add a workbench official "Fully Specified Name"
+	 * 
+	 * @param languageRefset - the language refset this belongs to - null to default to US EN.
+	 * @return
+	 */
+	public TkDescription addFullySpecifiedName(EConcept eConcept, String fullySpecifiedName, UUID languageRefsetUuid, boolean retired)
+	{
+		TkDescription d = addDescription(eConcept, fullySpecifiedName, fullySpecifiedNameUuid_, retired);
+		addUuidAnnotation(d, synonymPreferredUuid_, (languageRefsetUuid == null ? usEnRefsetUuid_ : languageRefsetUuid));
+		return d;
+	}
 
 	/**
 	 * Add a workbench official "Fully Specified Name"
@@ -214,9 +227,7 @@ public class EConceptUtility
 	 */
 	public TkDescription addFullySpecifiedName(EConcept eConcept, String fullySpecifiedName, UUID languageRefsetUuid)
 	{
-		TkDescription d = addDescription(eConcept, fullySpecifiedName, fullySpecifiedNameUuid_, false);
-		addUuidAnnotation(d, synonymPreferredUuid_, (languageRefsetUuid == null ? usEnRefsetUuid_ : languageRefsetUuid));
-		return d;
+		return addFullySpecifiedName(eConcept, fullySpecifiedName, languageRefsetUuid, false);
 	}
 
 	/**
