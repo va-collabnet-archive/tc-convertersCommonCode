@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * A utility class for generating UUIDs which keeps track of what was used to generate the UUIDs - which 
+ * A utility class for generating UUIDs which keeps track of what was used to generate the UUIDs - which
  * can then be dumped to disk (or looked up by UUID)
+ * 
  * @author darmbrust
  */
 
@@ -58,19 +59,19 @@ public class ConverterUUID
 		masterUUIDMap_.put(uuid, name);
 		return uuid;
 	}
-	
+
 	/**
-	 * Return the string that was used to generate this UUID (if available - null if not) 
+	 * Return the string that was used to generate this UUID (if available - null if not)
 	 */
 	public static String getUUIDCreationString(UUID uuid)
 	{
-	    if (uuid == null)
-	    {
-	        return null;
-	    }
+		if (uuid == null)
+		{
+			return null;
+		}
 		return masterUUIDMap_.get(uuid);
 	}
-	
+
 	/**
 	 * Write out a debug file with all of the UUID - String mappings
 	 */
@@ -83,9 +84,9 @@ public class ConverterUUID
 		}
 		br.close();
 	}
-	
+
 	/**
-	 * Allow this map to be updated with UUIDs that were not generated via this utility class 
+	 * Allow this map to be updated with UUIDs that were not generated via this utility class
 	 */
 	public static void addMapping(String value, UUID uuid)
 	{
