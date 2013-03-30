@@ -61,6 +61,7 @@ public class Unzip
 						// noop
 					}
 				}
+				zip.close();
 			}
 
 		}
