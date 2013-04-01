@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class ConverterUUID
 {
-	public static boolean enableDupeUUIDException = true;
+	public static boolean enableDupeUUIDException = false;
 	private static Hashtable<UUID, String> masterUUIDMap_ = new Hashtable<UUID, String>();
 
 	/**
