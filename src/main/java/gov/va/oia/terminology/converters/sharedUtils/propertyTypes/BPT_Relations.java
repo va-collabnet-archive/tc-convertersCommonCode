@@ -8,8 +8,8 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
  */
 public class BPT_Relations extends PropertyType
 {
-	public BPT_Relations(String uuidRoot)
+	public BPT_Relations(String uuidRoot, String terminologyName)
 	{
-		super("Relation Types", uuidRoot);
+		super("Relation Types", terminologyName + " Relation Type", uuidRoot);
 	}
 }

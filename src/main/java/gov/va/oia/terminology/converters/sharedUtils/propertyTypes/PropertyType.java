@@ -22,6 +22,8 @@ public abstract class PropertyType
 	private UUID propertyTypeUUID = null;
 	private String propertyTypeDescription_;
 	private String uuidRoot_;
+	private String propertyTypeReferenceSetName_;
+	private UUID propertyTypeReferenceSetUUID;
 
 	private Map<String, Property> properties_;
 
@@ -29,12 +31,23 @@ public abstract class PropertyType
 	{
 		srcVersion_ = version;
 	}
-
+	
 	protected PropertyType(String propertyTypeDescription, String uuidRoot)
 	{
 		this.properties_ = new HashMap<String, Property>();
 		this.propertyTypeDescription_ = propertyTypeDescription;
 		this.uuidRoot_ = uuidRoot;
+		propertyTypeReferenceSetName_ = null;
+		propertyTypeReferenceSetUUID = null;
+	}
+
+	protected PropertyType(String propertyTypeDescription, String propertyTypeRefSetName, String uuidRoot)
+	{
+		this.properties_ = new HashMap<String, Property>();
+		this.propertyTypeDescription_ = propertyTypeDescription;
+		this.uuidRoot_ = uuidRoot;
+		propertyTypeReferenceSetName_ = propertyTypeRefSetName;
+		propertyTypeReferenceSetUUID = ConverterUUID.nameUUIDFromBytes((uuidRoot + propertyTypeReferenceSetName_).getBytes());
 	}
 
 	public UUID getPropertyTypeUUID()
@@ -79,24 +92,34 @@ public abstract class PropertyType
 	public Property addProperty(Property property)
 	{
 		property.setOwner(this);
-		properties_.put(property.getSourcePropertyName(), property);
+		properties_.put(property.getSourcePropertyNameFSN(), property);
 		return property;
 	}
 
-	public Property addProperty(String propertyName)
+	public Property addProperty(String propertyNameFSN)
 	{
-		return addProperty(propertyName, propertyName, false);
+		return addProperty(propertyNameFSN, propertyNameFSN, null, false);
+	}
+	
+	public Property addProperty(String propertyNameFSN, int propertySubType)
+	{
+		return addProperty(propertyNameFSN, propertyNameFSN, null, false, propertySubType);
 	}
 
-	public Property addProperty(String sourcePropertyName, String sourcePropertyDescription)
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition)
 	{
-		return addProperty(sourcePropertyName, sourcePropertyDescription, false);
+		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, false);
+	}
+	
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled)
+	{
+		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, -1);
 	}
 
-	public Property addProperty(String sourcePropertyName, String sourcePropertyDescription, boolean disabled)
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
 	{
-		Property property = new Property(this, sourcePropertyName, sourcePropertyDescription, disabled);
-		properties_.put(sourcePropertyName, property);
+		Property property = new Property(this, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, propertySubType);
+		properties_.put(sourcePropertyNameFSN, property);
 		return property;
 	}
 
@@ -104,21 +127,42 @@ public abstract class PropertyType
 	 * Only adds the property if the version of the data file falls between min and max, inclusive.
 	 * pass 0 in min or max to specify no min or no max, respectively
 	 */
-	public Property addProperty(String propertyName, int minVersion, int maxVersion)
+	public Property addProperty(String propertyNameFSN, int minVersion, int maxVersion)
 	{
-		return addProperty(propertyName, propertyName, minVersion, maxVersion, false);
+		return addProperty(propertyNameFSN, propertyNameFSN, null, minVersion, maxVersion, false);
+	}
+	
+	/**
+	 * Only adds the property if the version of the data file falls between min and max, inclusive.
+	 * pass 0 in min or max to specify no min or no max, respectively
+	 */
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, 
+			int minVersion, int maxVersion, boolean disabled)
+	{
+		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, minVersion, maxVersion, disabled, -1);
 	}
 
 	/**
 	 * Only adds the property if the version of the data file falls between min and max, inclusive.
 	 * pass 0 in min or max to specify no min or no max, respectively
 	 */
-	public Property addProperty(String sourcePropertyName, String sourcePropertyDescription, int minVersion, int maxVersion, boolean disabled)
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, 
+			int minVersion, int maxVersion, boolean disabled, int propertySubType)
 	{
 		if ((minVersion != 0 && srcVersion_ < minVersion) || (maxVersion != 0 && srcVersion_ > maxVersion))
 		{
 			return null;
 		}
-		return addProperty(sourcePropertyName, sourcePropertyDescription, disabled);
+		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, propertySubType);
+	}
+	
+	public UUID getPropertyTypeReferenceSetUUID()
+	{
+		return propertyTypeReferenceSetUUID;
+	}
+	
+	public String getPropertyTypeReferenceSetName()
+	{
+		return propertyTypeReferenceSetName_;
 	}
 }
