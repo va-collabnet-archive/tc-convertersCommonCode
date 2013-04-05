@@ -124,15 +124,6 @@ public class EConceptUtility
 	}
 
 	/**
-	 * Create a concept, automatically setting as many fields as possible (adds a description, calculates
-	 * the UUID, status current, etc)
-	 */
-	public EConcept createConcept(String conceptPrimordialUuidOrigin, String preferredDescription)
-	{
-		return createConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + conceptPrimordialUuidOrigin).getBytes()), preferredDescription);
-	}
-
-	/**
 	 * Create a concept, link it to a parent via is_a, setting as many fields as possible automatically.
 	 */
 	public EConcept createConcept(String name, UUID parentConceptPrimordial)
@@ -513,14 +504,6 @@ public class EConceptUtility
 	}
 
 	/**
-	 * Generates the UUID, uses the concept time
-	 */
-	public TkRefexUuidMember addConceptAnnotation(EConcept eConcept, EConcept annotationValue, UUID refsetUuid)
-	{
-		return addUuidAnnotation(eConcept.getConceptAttributes(), annotationValue.getPrimordialUuid(), refsetUuid);
-	}
-
-	/**
 	 * Generates the UUID, uses the component time
 	 * 
 	 * @param valueConcept - if value is null, it uses RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid()
@@ -620,7 +603,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid)
 	{
-		return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid, null, null);
+		return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid, null, null, null, null);
 	}
 
 	/**
@@ -632,7 +615,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid, UUID relTypeUuid, Long time)
 	{
-		return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid, relTypeUuid, time);
+		return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid, relTypeUuid, null, null, time);
 	}
 	
 	/**
@@ -653,17 +636,6 @@ public class EConceptUtility
 		}
 	}
 	
-	/**
-	 * Add a relationship. The source of the relationship is assumed to be the specified concept.
-	 * 
-	 * @param relTypeUuid - is optional - if not provided, the default value of IS_A_REL is used.
-	 * @param time - if null, now is used
-	 */
-	public TkRelationship addRelationship(EConcept eConcept, UUID relPrimordialUuid, UUID targetUuid, UUID relTypeUuid, Long time)
-	{
-		return addRelationship(eConcept,  relPrimordialUuid, targetUuid, relTypeUuid, null, null, time);
-	}
-
 	/**
 	 * Add a relationship. The source of the relationship is assumed to be the specified concept.
 	 * 
