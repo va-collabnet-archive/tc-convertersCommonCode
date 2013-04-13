@@ -77,7 +77,7 @@ public class EConceptUtility
 	public final String VA_REFSET_NAME = "VA Refsets";
 //	public final UUID pathOriginRefSet = UUID.fromString("1239b874-41b4-32a1-981f-88b448829b4b");  //TODO find a constant for this
 //	public final UUID pathRelease = UUID.fromString("88f89cc0-1d94-34a4-85ed-aa1949079314");  //TODO find constant for this
-	public final UUID VA_REFSET_UUID = ConverterUUID.nameUUIDFromBytes(("gov.va.med.term.refset." + VA_REFSET_NAME).getBytes());
+	public final UUID VA_REFSET_UUID = ConverterUUID.createNamespaceUUIDFromString(null, "gov.va.med.term.refset." + VA_REFSET_NAME);
 //	public final UUID workbenchAuxilary = TermAux.WB_AUX_PATH.getUuids()[0];
 
 	private final String lang_ = "en";
@@ -93,14 +93,13 @@ public class EConceptUtility
 
 	private LoadStats ls_ = new LoadStats();
 
-	private String uuidRoot_;
-
 	/**
 	 * Creates and stores the path concept.
 	 */
-	public EConceptUtility(String uuidRoot, String pathName, DataOutputStream dos) throws Exception
+	public EConceptUtility(String namespaceSeed, String pathName, DataOutputStream dos) throws Exception
 	{
-		this.uuidRoot_ = uuidRoot;
+		UUID namespace = ConverterUUID.createNamespaceUUIDFromString(null, namespaceSeed);
+		ConverterUUID.configureNamespace(namespace);
 		//Start out creating our path concept, by hanging it under path/release
 		//Note, this concept gets created on WorkbenchAuxiliary path.
 		//TODO figure out this path non-sense
@@ -120,7 +119,7 @@ public class EConceptUtility
 	 */
 	public EConcept createConcept(String preferredDescription)
 	{
-		return createConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + preferredDescription).getBytes()), preferredDescription);
+		return createConcept(ConverterUUID.createNamespaceUUIDFromString(preferredDescription), preferredDescription);
 	}
 
 	/**
@@ -320,7 +319,7 @@ public class EConceptUtility
 		description.setConceptUuid(eConcept.getPrimordialUuid());
 		description.setLang(lang_);
 		description.setPrimordialComponentUuid(descriptionPrimordialUUID == null ? 
-				ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "descr:" + descUnique_++).getBytes()) : descriptionPrimordialUUID);
+				ConverterUUID.createNamespaceUUIDFromString("descr:" + descUnique_++) : descriptionPrimordialUUID);
 		UUID descriptionTypeUuid = null;
 		if (DescriptionType.FSN == wbDescriptionType)
 		{
@@ -461,7 +460,7 @@ public class EConceptUtility
 	public TkRefsetStrMember addStringAnnotation(EConcept eConcept, String annotationValue, UUID refsetUuid, boolean retired)
 	{
 		return addStringAnnotation(eConcept.getConceptAttributes(),
-				ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "stringAnnotation:" + stringAnnotationUnique_++).getBytes()), annotationValue, refsetUuid, retired, null);
+				ConverterUUID.createNamespaceUUIDFromString("stringAnnotation:" + stringAnnotationUnique_++), annotationValue, refsetUuid, retired, null);
 	}
 
 	/**
@@ -469,7 +468,7 @@ public class EConceptUtility
 	 */
 	public TkRefsetStrMember addStringAnnotation(TkComponent<?> component, String annotationValue, UUID refsetUuid, boolean retired)
 	{
-		return addStringAnnotation(component, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "stringAnnotation:" + stringAnnotationUnique_++).getBytes()), annotationValue,
+		return addStringAnnotation(component, ConverterUUID.createNamespaceUUIDFromString("stringAnnotation:" + stringAnnotationUnique_++), annotationValue,
 				refsetUuid, retired, null);
 	}
 
@@ -510,7 +509,7 @@ public class EConceptUtility
 	 */
 	public TkRefexUuidMember addUuidAnnotation(TkComponent<?> component, UUID valueConcept, UUID refsetUuid)
 	{
-		return addUuidAnnotation(component, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "uuidAnnotation:" + uuidAnnotationUnique_++).getBytes()), valueConcept,
+		return addUuidAnnotation(component, ConverterUUID.createNamespaceUUIDFromString("uuidAnnotation:" + uuidAnnotationUnique_++), valueConcept,
 				refsetUuid, false, null);
 	}
 
@@ -571,7 +570,7 @@ public class EConceptUtility
 	 */
 	public TkRefexUuidMember addRefsetMember(EConcept refsetConcept, UUID targetUuid, boolean active, Long time)
 	{
-		return addRefsetMember(refsetConcept, targetUuid, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "refsetItem:" + refsetMemberUnique_++).getBytes()), active, time);
+		return addRefsetMember(refsetConcept, targetUuid, ConverterUUID.createNamespaceUUIDFromString("refsetItem:" + refsetMemberUnique_++), active, time);
 	}
 
 	/**
@@ -603,7 +602,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid)
 	{
-		return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid, null, null, null, null);
+		return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), targetUuid, null, null, null, null);
 	}
 
 	/**
@@ -615,7 +614,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid, UUID relTypeUuid, Long time)
 	{
-		return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), targetUuid, relTypeUuid, null, null, time);
+		return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), targetUuid, relTypeUuid, null, null, time);
 	}
 	
 	/**
@@ -626,12 +625,12 @@ public class EConceptUtility
 	{
 		if (p.getWBTypeUUID() == null)
 		{
-			return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), 
+			return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), 
 					targetUuid, p.getUUID(), null, null, time);
 		}
 		else
 		{
-			return addRelationship(eConcept, ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "rel:" + relUnique_++).getBytes()), 
+			return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), 
 					targetUuid, p.getWBTypeUUID(), p.getUUID(), p.getPropertyType().getPropertyTypeReferenceSetUUID(), time);
 		}
 	}
@@ -722,7 +721,7 @@ public class EConceptUtility
 	 */
 	public EConcept createAndStoreMetaDataConcept(String name, UUID relParentPrimordial, DataOutputStream dos) throws Exception
 	{
-		return createAndStoreMetaDataConcept(ConverterUUID.nameUUIDFromBytes((uuidRoot_ + name).getBytes()), name, null, null, relParentPrimordial, null, dos);
+		return createAndStoreMetaDataConcept(ConverterUUID.createNamespaceUUIDFromString(name), name, null, null, relParentPrimordial, null, dos);
 	}
 
 	/**

@@ -10,8 +10,8 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
  */
 public abstract class BPT_Skip extends PropertyType
 {
-	public BPT_Skip(String description, String uuidRoot)
+	public BPT_Skip(String description)
 	{
-		super(description, uuidRoot);
+		super(description);
 	}
 }

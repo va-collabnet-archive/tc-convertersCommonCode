@@ -21,7 +21,6 @@ public abstract class PropertyType
 	protected static int srcVersion_ = 1;
 	private UUID propertyTypeUUID = null;
 	private String propertyTypeDescription_;
-	private String uuidRoot_;
 	private String propertyTypeReferenceSetName_;
 	private UUID propertyTypeReferenceSetUUID;
 
@@ -32,29 +31,27 @@ public abstract class PropertyType
 		srcVersion_ = version;
 	}
 	
-	protected PropertyType(String propertyTypeDescription, String uuidRoot)
+	protected PropertyType(String propertyTypeDescription)
 	{
 		this.properties_ = new HashMap<String, Property>();
 		this.propertyTypeDescription_ = propertyTypeDescription;
-		this.uuidRoot_ = uuidRoot;
 		propertyTypeReferenceSetName_ = null;
 		propertyTypeReferenceSetUUID = null;
 	}
 
-	protected PropertyType(String propertyTypeDescription, String propertyTypeRefSetName, String uuidRoot)
+	protected PropertyType(String propertyTypeDescription, String propertyTypeRefSetName)
 	{
 		this.properties_ = new HashMap<String, Property>();
 		this.propertyTypeDescription_ = propertyTypeDescription;
-		this.uuidRoot_ = uuidRoot;
 		propertyTypeReferenceSetName_ = propertyTypeRefSetName;
-		propertyTypeReferenceSetUUID = ConverterUUID.nameUUIDFromBytes((uuidRoot + propertyTypeReferenceSetName_).getBytes());
+		propertyTypeReferenceSetUUID = ConverterUUID.createNamespaceUUIDFromString(propertyTypeReferenceSetName_);
 	}
 
 	public UUID getPropertyTypeUUID()
 	{
 		if (propertyTypeUUID == null)
 		{
-			propertyTypeUUID = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_).getBytes());
+			propertyTypeUUID = ConverterUUID.createNamespaceUUIDFromString(propertyTypeDescription_);
 		}
 		return propertyTypeUUID;
 	}
@@ -66,7 +63,7 @@ public abstract class PropertyType
 
 	protected UUID getPropertyUUID(String propertyName)
 	{
-		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_ + ":" + propertyName).getBytes());
+		return ConverterUUID.createNamespaceUUIDFromString(propertyTypeDescription_ + ":" + propertyName);
 	}
 
 	public Property getProperty(String propertyName)

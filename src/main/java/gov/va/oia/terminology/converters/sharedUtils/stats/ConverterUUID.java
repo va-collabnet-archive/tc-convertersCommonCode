@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
+import org.dwfa.util.id.Type5UuidFactory;
 
 /**
  * A utility class for generating UUIDs which keeps track of what was used to generate the UUIDs - which
@@ -17,46 +18,49 @@ import java.util.UUID;
 
 public class ConverterUUID
 {
-	public static boolean enableDupeUUIDException = false;
+	public static boolean enableDupeUUIDException_ = false;
 	private static Hashtable<UUID, String> masterUUIDMap_ = new Hashtable<UUID, String>();
+	private static UUID namespace_ = null;
 
 	/**
-	 * Simply calls java.util.UUID.randomUUID()
+	 * Create a new Type5 UUID using the provided name as the seed in the configured namespace.
 	 * 
-	 * @see java.util.UUID#randomUUID
+	 * Throws a runtime exception if the namespace has not been configured.
 	 */
-	public static UUID randomUUID()
+	public static UUID createNamespaceUUIDFromString(String name)
 	{
-		UUID uuid = UUID.randomUUID();
-		masterUUIDMap_.put(uuid, "_RANDOM_");
-		return uuid;
+		initCheck();
+		return createNamespaceUUIDFromString(namespace_, name);
 	}
-
-	/**
-	 * Simply calls java.util.UUID.nameUUIDFromBytes(byte[])
-	 * 
-	 * @see java.util.UUID#nameUUIDFromBytes(byte[]);
-	 */
-	public static UUID nameUUIDFromBytes(byte[] name)
+	
+	private static void initCheck()
 	{
-		UUID uuid = UUID.nameUUIDFromBytes(name);
+		if (namespace_ == null)
+		{
+			throw new RuntimeException("Namespace UUID has not yet been initialized");
+		}
+	}
+	
+	/**
+	 * Create a new Type5 UUID using the provided namespace, and provided name as the seed.
+	 */
+	public static UUID createNamespaceUUIDFromString(UUID namespace, String name)
+	{
+		UUID uuid;
+		try
+		{
+			uuid = Type5UuidFactory.get(namespace, name);
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException("Unexpected error configuring UUID generator");
+		}
+		
 		String putResult = masterUUIDMap_.put(uuid, new String(name));
-		if (enableDupeUUIDException && putResult != null)
+		if (enableDupeUUIDException_ && putResult != null)
 		{
 			throw new RuntimeException("Just made a duplicate UUID! '" + new String(name) + "' -> " + uuid);
 		}
-		return uuid;
-	}
-
-	/**
-	 * Simply calls java.util.UUID.fromString(String)
-	 * 
-	 * @see java.util.UUID#fromString(String)
-	 */
-	public static UUID fromString(String name)
-	{
-		UUID uuid = UUID.fromString(name);
-		masterUUIDMap_.put(uuid, name);
 		return uuid;
 	}
 
@@ -91,5 +95,23 @@ public class ConverterUUID
 	public static void addMapping(String value, UUID uuid)
 	{
 		masterUUIDMap_.put(uuid, value);
+	}
+	
+	/**
+	 * In some scenarios, it isn't desireable to cache every creation string - allow the removal in these cases.
+	 */
+	public static void removeMapping(UUID uuid)
+	{
+		masterUUIDMap_.remove(uuid);
+	}
+	
+	public static void configureNamespace(UUID namespace)
+	{
+		//I can't think of a use case where someone should do this, so throw error.
+		if (namespace_ != null)
+		{
+			throw new RuntimeException("Namespace is already configured!");
+		}
+		namespace_ = namespace;
 	}
 }

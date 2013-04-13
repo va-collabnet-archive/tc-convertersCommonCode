@@ -21,8 +21,8 @@ public class BPT_Descriptions extends PropertyType
 	public static final int SYNONYM = 20;
 	public static final int DEFINITION = 40;
 
-	public BPT_Descriptions(String uuidRoot, String terminologyName)
+	public BPT_Descriptions(String terminologyName)
 	{
-		super("Description Types", terminologyName + " Description Type", uuidRoot);
+		super("Description Types", terminologyName + " Description Type");
 	}
 }

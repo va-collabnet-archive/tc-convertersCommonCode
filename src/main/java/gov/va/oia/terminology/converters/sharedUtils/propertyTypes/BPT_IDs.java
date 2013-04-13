@@ -9,8 +9,8 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
  */
 public class BPT_IDs extends PropertyType
 {
-	public BPT_IDs(String uuidRoot)
+	public BPT_IDs()
 	{
-		super("ID Types", uuidRoot);
+		super("ID Types");
 	}
 }
