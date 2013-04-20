@@ -45,6 +45,7 @@ public abstract class PropertyType
 		this.propertyTypeDescription_ = propertyTypeDescription;
 		propertyTypeReferenceSetName_ = propertyTypeRefSetName;
 		propertyTypeReferenceSetUUID = ConverterUUID.createNamespaceUUIDFromString(propertyTypeReferenceSetName_);
+		ConverterUUID.removeMapping(propertyTypeReferenceSetUUID);  //disable dupe detection for this one (at least, don't let this trigger it)
 	}
 
 	public UUID getPropertyTypeUUID()

@@ -1,6 +1,7 @@
 package gov.va.oia.terminology.converters.sharedUtils.propertyTypes;
 
-import java.util.UUID;
+import java.util.HashMap;
+import org.ihtsdo.etypes.EConcept;
 
 /**
  * Fields to treat as refsets
@@ -10,23 +11,43 @@ import java.util.UUID;
  */
 public class BPT_Refsets extends PropertyType
 {
-	private UUID refsetIdentityParent;
+	private HashMap<String, EConcept> conceptMap_;  //We store concepts here, because by their nature, refsets can't be written until they are populated
+	//this happens much later in the conversion cycle.
+	private EConcept refsetIdentityParent_;  //Typically "Term-name Refsets" under "VA Refsets"
 
-	/**
-	 * @param refsetIdentityParent A second UUID to set as a parent to this concept, typically
-	 *            ConceptConstants.REFSET.getUuids()[0] or a child of it
-	 */
-	public BPT_Refsets(UUID refsetIdentityParent)
+	public BPT_Refsets(String terminologyName)
 	{
-		super("Refsets");
-		this.refsetIdentityParent = refsetIdentityParent;
+		super("Refsets", terminologyName + " Refsets");
+		conceptMap_ = new HashMap<>();
 	}
-
-	/**
-	 * A second UUID to set as a parent to this concept, typically ConceptConstants.REFSET.getUuids()[0] or a child of it
-	 */
-	public UUID getRefsetIdentityParent()
+	
+	public EConcept getConcept(String propertyName)
 	{
-		return this.refsetIdentityParent;
+		return getConcept(getProperty(propertyName));
+	}
+	
+	public EConcept getConcept(Property property)
+	{
+		return conceptMap_.get(property.getSourcePropertyNameFSN());
+	}
+	
+	public void setConcept(Property property, EConcept concept)
+	{
+		conceptMap_.put(property.getSourcePropertyNameFSN(), concept);
+	}
+	
+	public void clearConcepts()
+	{
+		conceptMap_.clear();
+	}
+	
+	public void setRefsetIdentityParent(EConcept refsetIdentityParent)
+	{
+		refsetIdentityParent_ = refsetIdentityParent; 
+	}
+	
+	public EConcept getRefsetIdentityParent()
+	{
+		return refsetIdentityParent_;
 	}
 }
