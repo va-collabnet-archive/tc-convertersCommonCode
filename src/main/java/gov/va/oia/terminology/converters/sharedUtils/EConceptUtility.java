@@ -82,7 +82,6 @@ public class EConceptUtility
 	public final UUID pathRefSetUUID_ = UUID.fromString("fd9d47b7-c0a4-3eea-b3ab-2b5a3f9e888f");  //TODO find a constant for this "Path reference set"
 	public final UUID pathUUID_ = ArchitectonicAuxiliary.Concept.PATH.getPrimoridalUid();
 	public final UUID pathReleaseUUID_ =  ArchitectonicAuxiliary.Concept.RELEASE.getPrimoridalUid();
-	public final UUID SNOMEDCoreUUID_ = ArchitectonicAuxiliary.Concept.SNOMED_CORE.getPrimoridalUid();
 	public final UUID VA_REFSET_UUID = ConverterUUID.createNamespaceUUIDFromString(null, "gov.va.med.term.refset." + VA_REFSET_NAME);
 	public final UUID workbenchAuxilary = TermAux.WB_AUX_PATH.getUuids()[0];
 
@@ -113,29 +112,26 @@ public class EConceptUtility
 		UUID namespace = ConverterUUID.createNamespaceUUIDFromString(null, namespaceSeed);
 		ConverterUUID.configureNamespace(namespace);
 		
+		//Start our creating our path concept, by hanging it under path/release
+		//Note, this concept gets created on WorkbenchAuxiliary path.
+		//need to gen the UUID on the special namespace, so it can be targeted from assembly pom
+		EConcept c = createConcept(ConverterUUID.createNamespaceUUIDFromString(Type5UuidFactory.PATH_ID_FROM_FS_DESC, pathName), pathName, pathReleaseUUID_);  
+		addDescription(c, pathName, DescriptionType.SYNONYM, true, null, null, false);  //Need a synonym as well, to be able to target from assembly pom
+		c.writeExternal(dos);
 		
-//Note - Path per terminology code still doesn't work the way that we would like - the below code works - but results 
-// in a workbench where you cannot view multiple terminologies at once, which is rather undesireable.  So disabled for now, 
-// until Keith answers more questions about terminology-per-path
+		//Add it to the pathOriginRefSet, done on workbenchAux path.
+		EConcept pathOriginRefsetConcept = createConcept(pathOriginRefSetUUID_);
+		//Max value will be displayed as 'latest'.  Why on earth we are using an int for a time value, I have no idea.
+		addRefsetMember(pathOriginRefsetConcept, c.getPrimordialUuid(), workbenchAuxilary, Integer.MAX_VALUE, true, null);
+		pathOriginRefsetConcept.writeExternal(dos);
 		
+		//Also, add it to the pathRefset.  Also done on WorkbenchAux path.
+		EConcept pathRefsetConcept = createConcept(pathRefSetUUID_);
+		addRefsetMember(pathRefsetConcept, pathUUID_, c.getPrimordialUuid(), true, null);
+		pathRefsetConcept.writeExternal(dos);
 		
-//		//Start our creating our path concept, by hanging it under path/release
-//		//Note, this concept gets created on WorkbenchAuxiliary path.
-//		EConcept c = createConcept(pathName, SNOMEDCoreUUID_);
-//		c.writeExternal(dos);
-//		
-//		//Add it to the pathOriginRefSet, done on workbenchAux path.
-//		EConcept pathOriginRefsetConcept = createConcept(pathOriginRefSetUUID_);
-//		//Max value will be displayed as 'latest'.  Why on earth we are using an int for a time value, I have no idea.
-//		addRefsetMember(pathOriginRefsetConcept, c.getPrimordialUuid(), SNOMEDCoreUUID_, Integer.MAX_VALUE, true, null);
-//		pathOriginRefsetConcept.writeExternal(dos);
-//		
-//		//Also, add it to the pathRefset.  Also done on WorkbenchAux path.
-//		EConcept pathRefsetConcept = createConcept(pathRefSetUUID_);
-//		addRefsetMember(pathRefsetConcept, pathUUID_, c.getPrimordialUuid(), true, null);
-//		pathRefsetConcept.writeExternal(dos);
-//		
-//		terminologyPathUUID_ = c.getPrimordialUuid();  //Now change the path to our new path concept
+		terminologyPathUUID_ = c.getPrimordialUuid();  //Now change the path to our new path concept
+		ConsoleUtil.println("The path to be specified in the workbench assembly pom is '" + pathName + "'");
 	}
 
 	/**
