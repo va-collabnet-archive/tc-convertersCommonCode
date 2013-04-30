@@ -84,7 +84,8 @@ public class EConceptUtility
 	public final UUID pathReleaseUUID_ =  ArchitectonicAuxiliary.Concept.RELEASE.getPrimoridalUid();
 	public final UUID VA_REFSET_UUID = ConverterUUID.createNamespaceUUIDFromString(null, "gov.va.med.term.refset." + VA_REFSET_NAME);
 	public final UUID workbenchAuxilary = TermAux.WB_AUX_PATH.getUuids()[0];
-
+	public final long defaultTime_ = System.currentTimeMillis();
+	
 	private final String lang_ = "en";
 	private UUID terminologyPathUUID_ = workbenchAuxilary;  //start with this.
 
@@ -733,7 +734,7 @@ public class EConceptUtility
 		object.setModuleUuid(moduleUuid_);
 		object.setPathUuid(terminologyPathUUID_);
 		object.setStatusUuid(statusUuid == null ? statusCurrentUuid_ : statusUuid);
-		object.setTime(time == null ? System.currentTimeMillis() : time.longValue());
+		object.setTime(time == null ? defaultTime_ : time.longValue());
 	}
 
 	private String getOriginStringForUuid(UUID uuid)
