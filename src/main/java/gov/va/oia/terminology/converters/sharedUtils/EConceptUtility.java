@@ -56,6 +56,8 @@ public class EConceptUtility
 	{
 		try
 		{
+			//TODO we want to transition to the other "Is a" at some point - but work is underway to get rid of this 
+			//dual is-a mess in the WB, so, not changing it for now.
 			isARelUuid_ = ArchitectonicAuxiliary.Concept.IS_A_REL.getPrimoridalUid();
 		}
 		catch (Exception e)
@@ -68,7 +70,8 @@ public class EConceptUtility
 	public final UUID statusCurrentUuid_ = SnomedMetadataRf2.ACTIVE_VALUE_RF2.getUuids()[0];
 	public final UUID statusRetiredUuid_ = SnomedMetadataRf2.INACTIVE_VALUE_RF2.getUuids()[0];
 	public final UUID synonymUuid_ = SnomedMetadataRf2.SYNONYM_RF2.getUuids()[0];
-	public final UUID definitionUuid_ = UUID.fromString("700546a3-09c7-3fc2-9eb9-53d318659a09");  //TODO find constant for this "Definition (core metadata concept)" 
+	//TODO find constant for this "Definition (core metadata concept)"
+	public final UUID definitionUuid_ = UUID.fromString("700546a3-09c7-3fc2-9eb9-53d318659a09");   
 	public final UUID fullySpecifiedNameUuid_ = SnomedMetadataRf2.FULLY_SPECIFIED_NAME_RF2.getUuids()[0];
 	public final UUID descriptionAcceptableUuid_ = SnomedMetadataRf2.ACCEPTABLE_RF2.getUuids()[0];
 	public final UUID descriptionPreferredUuid_ = SnomedMetadataRf2.PREFERRED_RF2.getUuids()[0];
@@ -898,6 +901,10 @@ public class EConceptUtility
 		//Now create the terminology specific refset type as a child
 		createAndStoreMetaDataConcept(pt.getPropertyTypeReferenceSetUUID(), pt.getPropertyTypeReferenceSetName(), uuid, dos);
 		
+		//TODO we shouldn't have to create this concept in the future - two new concepts have been added to the US extension for this purpose.
+		//Should eventually be changed to "Semantic Description Type" and "Semantic Relationship Type" - so don't create this intermediate concept, 
+		//just hang our concept under the appropriate one which will already exist.
+		//Until then - create our own.....
 		//Finally, create the Reference set attribute children that we will put the actual properties under
 		//Create the concept under "Reference set attribute (foundation metadata concept)"  7e52203e-8a35-3121-b2e7-b783b34d97f2
 		uuid = Type5UuidFactory.get(refsetValueParentSynonynmName + " (foundation metadata concept)");
