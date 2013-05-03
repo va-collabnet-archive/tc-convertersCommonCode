@@ -900,6 +900,7 @@ public class EConceptUtility
 		
 		//Now create the terminology specific refset type as a child
 		createAndStoreMetaDataConcept(pt.getPropertyTypeReferenceSetUUID(), pt.getPropertyTypeReferenceSetName(), uuid, dos);
+		ConverterUUID.addMapping(pt.getPropertyTypeReferenceSetName(), pt.getPropertyTypeReferenceSetUUID());
 		
 		//TODO we shouldn't have to create this concept in the future - two new concepts have been added to the US extension for this purpose.
 		//Should eventually be changed to "Semantic Description Type" and "Semantic Relationship Type" - so don't create this intermediate concept, 
