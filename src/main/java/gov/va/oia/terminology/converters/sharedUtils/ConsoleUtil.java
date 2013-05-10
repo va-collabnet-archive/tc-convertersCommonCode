@@ -145,7 +145,7 @@ public class ConsoleUtil
 
 	public static void writeOutputToFile(Path path) throws IOException
 	{
-		BufferedWriter bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), new OpenOption[] {StandardOpenOption.CREATE_NEW});
+		BufferedWriter bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), new OpenOption[] {StandardOpenOption.CREATE});
 		bw.append(consoleOutputCache.toString());
 		bw.close();
 	}
