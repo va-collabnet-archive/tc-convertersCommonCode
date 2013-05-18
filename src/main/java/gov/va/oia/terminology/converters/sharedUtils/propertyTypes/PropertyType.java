@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.ihtsdo.etypes.EConcept;
 
 /**
  * Abstract base class to help in mapping code system property types into the workbench data model.
@@ -16,7 +17,7 @@ import java.util.UUID;
  * @author Daniel Armbrust
  */
 
-public abstract class PropertyType
+public abstract class PropertyType implements ConceptCreationNotificationListener
 {
 	protected static int srcVersion_ = 1;
 	private UUID propertyTypeUUID = null;
@@ -90,6 +91,7 @@ public abstract class PropertyType
 	public Property addProperty(Property property)
 	{
 		property.setOwner(this);
+		property.registerConceptCreationListener(this);
 		properties_.put(property.getSourcePropertyNameFSN(), property);
 		return property;
 	}
@@ -116,9 +118,7 @@ public abstract class PropertyType
 
 	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
 	{
-		Property property = new Property(this, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, propertySubType);
-		properties_.put(sourcePropertyNameFSN, property);
-		return property;
+		return addProperty(new Property(this, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, propertySubType));
 	}
 
 	/**
@@ -162,5 +162,11 @@ public abstract class PropertyType
 	public String getPropertyTypeReferenceSetName()
 	{
 		return propertyTypeReferenceSetName_;
+	}
+
+	@Override
+	public void conceptCreated(Property property, EConcept concept)
+	{
+		//default, noop method.
 	}
 }

@@ -1,6 +1,8 @@
 package gov.va.oia.terminology.converters.sharedUtils.propertyTypes;
 
+import java.util.ArrayList;
 import java.util.UUID;
+import org.ihtsdo.etypes.EConcept;
 
 public class Property
 {
@@ -12,6 +14,8 @@ public class Property
 	private PropertyType owner_;
 	private UUID propertyUUID = null;
 	private UUID useWBPropertyTypeInstead = null;  //see comments in setter
+	
+	private ArrayList<ConceptCreationNotificationListener> listeners_ = new ArrayList<>(1);
 
 	protected Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
 	{
@@ -121,5 +125,29 @@ public class Property
 	public PropertyType getPropertyType()
 	{
 		return owner_;
+	}
+	
+	/**
+	 * Mechanism to allow registration for notification when the corresponding eConcept has been created for this property.
+	 * Callback occurs before the eConcept is written.  Useful for adding additional attributes to the eConcept.
+	 * @param listener
+	 */
+	public void registerConceptCreationListener(ConceptCreationNotificationListener listener)
+	{
+		listeners_.add(listener);
+	}
+	
+	/**
+	 * This is called just before a metadata concept is written when the typical loadMetaDataItems(...) sequence is used in the eConceptUtility.  
+	 * 
+	 * Any the created concept will be passed to any registered listeners before the concept is written.
+	 * @param concept
+	 */
+	public void conceptCreated(EConcept concept)
+	{
+		for (ConceptCreationNotificationListener ccn : listeners_)
+		{
+			ccn.conceptCreated(this, concept);
+		}
 	}
 }

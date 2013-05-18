@@ -19,6 +19,7 @@ import org.dwfa.util.id.Type5UuidFactory;
 public class ConverterUUID
 {
 	public static boolean enableDupeUUIDException_ = false;
+	public static boolean disableUUIDMap_ = false;  //Some loaders need to disable this due to memory constraints
 	private static Hashtable<UUID, String> masterUUIDMap_ = new Hashtable<UUID, String>();
 	private static UUID namespace_ = null;
 
@@ -56,10 +57,13 @@ public class ConverterUUID
 			throw new RuntimeException("Unexpected error configuring UUID generator");
 		}
 		
-		String putResult = masterUUIDMap_.put(uuid, new String(name));
-		if (enableDupeUUIDException_ && putResult != null)
+		if (!disableUUIDMap_)
 		{
-			throw new RuntimeException("Just made a duplicate UUID! '" + new String(name) + "' -> " + uuid);
+			String putResult = masterUUIDMap_.put(uuid, new String(name));
+			if (enableDupeUUIDException_ && putResult != null)
+			{
+				throw new RuntimeException("Just made a duplicate UUID! '" + new String(name) + "' -> " + uuid);
+			}
 		}
 		return uuid;
 	}
@@ -82,6 +86,10 @@ public class ConverterUUID
 	public static void dump(File file) throws IOException
 	{
 		BufferedWriter br = new BufferedWriter(new FileWriter(file));
+		if (disableUUIDMap_)
+		{
+			br.write("Note - the UUID debug feature was disabled, this file is incomplete" + System.getProperty("line.separator"));
+		}
 		for (Map.Entry<UUID, String> entry : masterUUIDMap_.entrySet())
 		{
 			br.write(entry.getKey() + " - " + entry.getValue() + System.getProperty("line.separator"));

@@ -31,11 +31,6 @@ public class BPT_Refsets extends PropertyType
 		return conceptMap_.get(property.getSourcePropertyNameFSN());
 	}
 	
-	public void setConcept(Property property, EConcept concept)
-	{
-		conceptMap_.put(property.getSourcePropertyNameFSN(), concept);
-	}
-	
 	public void clearConcepts()
 	{
 		conceptMap_.clear();
@@ -49,5 +44,12 @@ public class BPT_Refsets extends PropertyType
 	public EConcept getRefsetIdentityParent()
 	{
 		return refsetIdentityParent_;
+	}
+
+	@Override
+	public void conceptCreated(Property p, EConcept concept)
+	{
+		super.conceptCreated(p, concept);
+		conceptMap_.put(p.getSourcePropertyNameFSN(), concept);
 	}
 }
