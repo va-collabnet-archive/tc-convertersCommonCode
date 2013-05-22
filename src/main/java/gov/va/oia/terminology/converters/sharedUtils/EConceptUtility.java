@@ -323,6 +323,8 @@ public class EConceptUtility
 	 * Add a description to the concept.
 	 * 
 	 * @param time - if null, set to the time on the concept.
+	 * @param sourceDescriptionTypeUUID - if null, set to "member"
+	 * @param sourceDescriptionRefsetUUID - if null, this and sourceDescriptionTypeUUID are ignored.
 	 */
 	public TkDescription addDescription(EConcept eConcept, UUID descriptionPrimordialUUID, String descriptionValue, DescriptionType wbDescriptionType, 
 			boolean preferred, UUID sourceDescriptionTypeUUID, UUID sourceDescriptionRefsetUUID, boolean retired)
@@ -363,12 +365,14 @@ public class EConceptUtility
 		//Add the en-us info
 		addUuidAnnotation(description, (preferred ? descriptionPreferredUuid_ : descriptionAcceptableUuid_), usEnRefsetUuid_);
 		
-		if (sourceDescriptionTypeUUID != null && sourceDescriptionRefsetUUID != null)
+		if (sourceDescriptionRefsetUUID != null)
 		{
 			addUuidAnnotation(description, sourceDescriptionTypeUUID, sourceDescriptionRefsetUUID);
 		}
 		
-		ls_.addDescription(sourceDescriptionTypeUUID == null ? wbDescriptionType.name() : wbDescriptionType.name() + ":" + getOriginStringForUuid(sourceDescriptionTypeUUID));
+		ls_.addDescription(wbDescriptionType.name() + (sourceDescriptionTypeUUID == null ? (sourceDescriptionRefsetUUID == null ? "" : ":-member-:") :
+				":" + getOriginStringForUuid(sourceDescriptionTypeUUID) + ":")
+					+ (sourceDescriptionRefsetUUID == null ? "" : getOriginStringForUuid(sourceDescriptionRefsetUUID)));
 		return description;
 	}
 
