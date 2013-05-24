@@ -534,6 +534,16 @@ public class EConceptUtility
 		return addUuidAnnotation(component, ConverterUUID.createNamespaceUUIDFromString("uuidAnnotation:" + uuidAnnotationUnique_++), valueConcept,
 				refsetUuid, false, null);
 	}
+	
+	/**
+	 * Generates the UUID, uses the component time
+	 * 
+	 * @param valueConcept - if value is null, it uses RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid()
+	 */
+	public TkRefexUuidMember addUuidAnnotation(EConcept concept, UUID valueConcept, UUID refsetUuid)
+	{
+		return addUuidAnnotation(concept.getConceptAttributes(), valueConcept, refsetUuid);
+	}
 
 	/**
 	 * @param time - If time is null, uses the component time.
@@ -655,7 +665,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid)
 	{
-		return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), targetUuid, null, null, null, null);
+		return addRelationship(eConcept, null, targetUuid, null, null, null, null);
 	}
 
 	/**
@@ -667,7 +677,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid, UUID relTypeUuid, Long time)
 	{
-		return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), targetUuid, relTypeUuid, null, null, time);
+		return addRelationship(eConcept, null, targetUuid, relTypeUuid, null, null, time);
 	}
 	
 	/**
@@ -678,19 +688,18 @@ public class EConceptUtility
 	{
 		if (p.getWBTypeUUID() == null)
 		{
-			return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), 
-					targetUuid, p.getUUID(), null, null, time);
+			return addRelationship(eConcept, null, targetUuid, p.getUUID(), null, null, time);
 		}
 		else
 		{
-			return addRelationship(eConcept, ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++), 
-					targetUuid, p.getWBTypeUUID(), p.getUUID(), p.getPropertyType().getPropertyTypeReferenceSetUUID(), time);
+			return addRelationship(eConcept, null, targetUuid, p.getWBTypeUUID(), p.getUUID(), p.getPropertyType().getPropertyTypeReferenceSetUUID(), time);
 		}
 	}
 	
 	/**
 	 * Add a relationship. The source of the relationship is assumed to be the specified concept.
 	 * 
+	 * @param relPrimordialUuid - optional - if not provided, randomly generated
 	 * @param relTypeUuid - is optional - if not provided, the default value of IS_A_REL is used.
 	 * @param time - if null, now is used
 	 */
@@ -705,7 +714,7 @@ public class EConceptUtility
 		}
 
 		TkRelationship rel = new TkRelationship();
-		rel.setPrimordialComponentUuid(relPrimordialUuid);
+		rel.setPrimordialComponentUuid(relPrimordialUuid == null ? ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++) : relPrimordialUuid);
 		rel.setC1Uuid(eConcept.getPrimordialUuid());
 		rel.setTypeUuid(relTypeUuid == null ? isARelUuid_ : relTypeUuid);
 		rel.setC2Uuid(targetUuid);
