@@ -92,13 +92,6 @@ public class EConceptUtility
 	private final String lang_ = "en";
 	private UUID terminologyPathUUID_ = workbenchAuxilary;  //start with this.
 
-	// Used for making unique UUIDs
-	private int relUnique_ = 0;
-	private int stringAnnotationUnique_ = 0;
-	private int uuidAnnotationUnique_ = 0;
-	private int descUnique_ = 0;
-	private int refsetMemberUnique_ = 0;
-
 	private LoadStats ls_ = new LoadStats();
 
 	/**
@@ -323,6 +316,7 @@ public class EConceptUtility
 	 * Add a description to the concept.
 	 * 
 	 * @param time - if null, set to the time on the concept.
+	 * @param descriptionPrimordialUUID - if null, set to random value
 	 * @param sourceDescriptionTypeUUID - if null, set to "member"
 	 * @param sourceDescriptionRefsetUUID - if null, this and sourceDescriptionTypeUUID are ignored.
 	 */
@@ -339,7 +333,7 @@ public class EConceptUtility
 		description.setConceptUuid(eConcept.getPrimordialUuid());
 		description.setLang(lang_);
 		description.setPrimordialComponentUuid(descriptionPrimordialUUID == null ? 
-				ConverterUUID.createNamespaceUUIDFromString("descr:" + descUnique_++) : descriptionPrimordialUUID);
+				ConverterUUID.createRandomUUID("Description") : descriptionPrimordialUUID);
 		UUID descriptionTypeUuid = null;
 		if (DescriptionType.FSN == wbDescriptionType)
 		{
@@ -513,7 +507,7 @@ public class EConceptUtility
 			strRefexMember.setComponentUuid(component.getPrimordialComponentUuid());
 			strRefexMember.setString1(value);
 			strRefexMember.setPrimordialComponentUuid(annotationPrimordialUuid == null ? 
-					ConverterUUID.createNamespaceUUIDFromString("stringAnnotation:" + stringAnnotationUnique_++) : annotationPrimordialUuid);
+					ConverterUUID.createRandomUUID("String Annotation") : annotationPrimordialUuid);
 			strRefexMember.setRefsetUuid(refsetUuid);
 			setRevisionAttributes(strRefexMember, (retired ? statusRetiredUuid_ : statusCurrentUuid_), (time == null ? component.getTime() : time));
 			annotations.add(strRefexMember);
@@ -531,8 +525,7 @@ public class EConceptUtility
 	 */
 	public TkRefexUuidMember addUuidAnnotation(TkComponent<?> component, UUID valueConcept, UUID refsetUuid)
 	{
-		return addUuidAnnotation(component, ConverterUUID.createNamespaceUUIDFromString("uuidAnnotation:" + uuidAnnotationUnique_++), valueConcept,
-				refsetUuid, false, null);
+		return addUuidAnnotation(component, null, valueConcept, refsetUuid, false, null);
 	}
 	
 	/**
@@ -562,7 +555,7 @@ public class EConceptUtility
 		TkRefexUuidMember conceptRefexMember = new TkRefexUuidMember();
 
 		conceptRefexMember.setComponentUuid(component.getPrimordialComponentUuid());
-		conceptRefexMember.setPrimordialComponentUuid(annotationPrimordialUuid);
+		conceptRefexMember.setPrimordialComponentUuid(annotationPrimordialUuid == null ? ConverterUUID.createRandomUUID("UUID Annotation") : annotationPrimordialUuid);
 		conceptRefexMember.setUuid1(valueConcept == null ? refsetMemberTypeNormalMemberUuid_ : valueConcept);
 		conceptRefexMember.setRefsetUuid(refsetUuid);
 		setRevisionAttributes(conceptRefexMember, (retired ? statusRetiredUuid_ : statusCurrentUuid_), (time == null ? component.getTime() : time));
@@ -603,12 +596,13 @@ public class EConceptUtility
 	 */
 	public TkRefexUuidMember addRefsetMember(EConcept refsetConcept, UUID targetUuid, UUID refsetMemberType, boolean active, Long time)
 	{
-		return addRefsetMember(refsetConcept, targetUuid, refsetMemberType, ConverterUUID.createNamespaceUUIDFromString("refsetItem:" + refsetMemberUnique_++), active, time);
+		return addRefsetMember(refsetConcept, targetUuid, refsetMemberType, null, active, time);
 	}
 
 	/**
 	 * @param time = if null, set to refsetConcept time
 	 * @param refsetMemberType - if null, is set to "normal member"
+	 * @param refsetMemberPrimordial - if null, set randomly
 	 */
 	public TkRefexUuidMember addRefsetMember(EConcept refsetConcept, UUID targetUuid, UUID refsetMemberType, UUID refsetMemberPrimordial, boolean active, Long time)
 	{
@@ -620,7 +614,7 @@ public class EConceptUtility
 		}
 		
 		TkRefexUuidMember refsetMember = new TkRefexUuidMember();
-		refsetMember.setPrimordialComponentUuid(refsetMemberPrimordial);
+		refsetMember.setPrimordialComponentUuid(refsetMemberPrimordial == null ? ConverterUUID.createRandomUUID("Refset UUID Member") : refsetMemberPrimordial);
 		refsetMember.setComponentUuid(targetUuid);  // ComponentUuid and refsetUuid seem like they are reversed at first glance, but this is right.
 		refsetMember.setRefsetUuid(refsetConcept.getPrimordialUuid());
 		refsetMember.setUuid1(refsetMemberType == null ? refsetMemberTypeNormalMemberUuid_ : refsetMemberType);
@@ -647,7 +641,7 @@ public class EConceptUtility
 		
 		TkRefexUuidIntMember refsetMember = new TkRefexUuidIntMember();
 		
-		refsetMember.setPrimordialComponentUuid(ConverterUUID.createNamespaceUUIDFromString("refsetItem:" + refsetMemberUnique_++));
+		refsetMember.setPrimordialComponentUuid(ConverterUUID.createRandomUUID("Refset UUID Int Member"));
 		refsetMember.setComponentUuid(targetUuid);  // ComponentUuid and refsetUuid seem like they are reversed at first glance, but this is right.
 		refsetMember.setRefsetUuid(refsetConcept.getPrimordialUuid());
 		refsetMember.setUuid1(refsetMemberType == null ? refsetMemberTypeNormalMemberUuid_ : refsetMemberType);
@@ -714,7 +708,7 @@ public class EConceptUtility
 		}
 
 		TkRelationship rel = new TkRelationship();
-		rel.setPrimordialComponentUuid(relPrimordialUuid == null ? ConverterUUID.createNamespaceUUIDFromString("rel:" + relUnique_++) : relPrimordialUuid);
+		rel.setPrimordialComponentUuid(relPrimordialUuid == null ? ConverterUUID.createRandomUUID("Relationship") : relPrimordialUuid);
 		rel.setC1Uuid(eConcept.getPrimordialUuid());
 		rel.setTypeUuid(relTypeUuid == null ? isARelUuid_ : relTypeUuid);
 		rel.setC2Uuid(targetUuid);
