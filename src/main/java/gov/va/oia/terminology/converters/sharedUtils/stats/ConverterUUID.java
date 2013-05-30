@@ -18,10 +18,10 @@ import org.dwfa.util.id.Type5UuidFactory;
 
 public class ConverterUUID
 {
-	public static boolean enableDupeUUIDException_ = false;
 	public static boolean disableUUIDMap_ = false;  //Some loaders need to disable this due to memory constraints
 	private static Hashtable<UUID, String> masterUUIDMap_ = new Hashtable<UUID, String>();
 	private static UUID namespace_ = null;
+
 
 	/**
 	 * Create a new Type5 UUID using the provided name as the seed in the configured namespace.
@@ -30,8 +30,21 @@ public class ConverterUUID
 	 */
 	public static UUID createNamespaceUUIDFromString(String name)
 	{
+		return createNamespaceUUIDFromString(name, false);
+	}
+	
+	/**
+	 * Create a new Type5 UUID using the provided name as the seed in the configured namespace.
+	 * 
+	 * Throws a runtime exception if the namespace has not been configured.
+	 * @param skipDupeCheck can be used to bypass the duplicate checking function - useful in cases where you know
+	 * you are creating the same UUID more than once.  Normally, this method throws a runtime exception
+	 * if the same UUID is generated more than once.
+	 */
+	public static UUID createNamespaceUUIDFromString(String name, boolean skipDupeCheck)
+	{
 		initCheck();
-		return createNamespaceUUIDFromString(namespace_, name);
+		return createNamespaceUUIDFromString(namespace_, name, skipDupeCheck);
 	}
 	
 	private static void initCheck()
@@ -47,6 +60,17 @@ public class ConverterUUID
 	 */
 	public static UUID createNamespaceUUIDFromString(UUID namespace, String name)
 	{
+		return createNamespaceUUIDFromString(namespace, name, false);
+	}
+	
+	/**
+	 * Create a new Type5 UUID using the provided namespace, and provided name as the seed.
+	 * @param skipDupeCheck can be used to bypass the duplicate checking function - useful in cases where you know
+	 * you are creating the same UUID more than once.  Normally, this method throws a runtime exception
+	 * if the same UUID is generated more than once.
+	 */
+	public static UUID createNamespaceUUIDFromString(UUID namespace, String name, boolean skipDupeCheck)
+	{
 		UUID uuid;
 		try
 		{
@@ -59,10 +83,30 @@ public class ConverterUUID
 		
 		if (!disableUUIDMap_)
 		{
-			String putResult = masterUUIDMap_.put(uuid, new String(name));
-			if (enableDupeUUIDException_ && putResult != null)
+			String putResult = masterUUIDMap_.put(uuid, name);
+			if (!skipDupeCheck && putResult != null)
 			{
-				throw new RuntimeException("Just made a duplicate UUID! '" + new String(name) + "' -> " + uuid);
+				throw new RuntimeException("Just made a duplicate UUID! '" + name + "' -> " + uuid);
+			}
+		}
+		return uuid;
+	}
+	
+	/**
+	 * Create a new Type4 Random UUID 
+	 * @param reasonToStoreForRandom - has no impact on the generation of the UUID - simply stored in the master UUID map 
+	 * and will be written out with the debug file when all created UUIDs are written out.
+	 */
+	public static UUID createRandomUUID(String reasonToStoreForRandom)
+	{
+		UUID uuid = UUID.randomUUID();
+
+		if (!disableUUIDMap_)
+		{
+			String putResult = masterUUIDMap_.put(uuid, "Random: " + reasonToStoreForRandom);
+			if (putResult != null)
+			{
+				throw new RuntimeException("Just made a duplicate UUID! 'Random: " + reasonToStoreForRandom + "' -> " + uuid);
 			}
 		}
 		return uuid;
