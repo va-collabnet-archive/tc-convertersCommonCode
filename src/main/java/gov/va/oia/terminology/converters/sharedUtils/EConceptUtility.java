@@ -611,6 +611,12 @@ public class EConceptUtility
 		{
 			refsetMembers = new ArrayList<TkRefexAbstractMember<?>>();
 			refsetConcept.setRefsetMembers(refsetMembers);
+			/*
+			 * These settings could be used to convert member lists - but it requires painful conversion at load time
+			 * where concepts must be manually listed in the pom file.  So, don't bother.
+			 */
+			refsetConcept.setAnnotationStyleRefex(false);  //put the annotations on the target (when true)
+			refsetConcept.setAnnotationIndexStyleRefex(false);  //and index them (when true)
 		}
 		
 		TkRefexUuidMember refsetMember = new TkRefexUuidMember();
@@ -637,6 +643,12 @@ public class EConceptUtility
 		{
 			refsetMembers = new ArrayList<TkRefexAbstractMember<?>>();
 			refsetConcept.setRefsetMembers(refsetMembers);
+			/*
+			 * These settings could be used to convert member lists - but it requires painful conversion at load time
+			 * where concepts must be manually listed in the pom file.  So, don't bother.
+			 */
+			refsetConcept.setAnnotationStyleRefex(false);  //put the annotations on the target (when true)
+			refsetConcept.setAnnotationIndexStyleRefex(false);  //and index them (when true)
 		}
 		
 		TkRefexUuidIntMember refsetMember = new TkRefexUuidIntMember();
@@ -799,6 +811,8 @@ public class EConceptUtility
 			throws Exception
 	{
 		EConcept concept = createConcept(primordial, fsnName);
+		concept.setAnnotationIndexStyleRefex(true);  //Make sure any annotations that we add to this concept get indexed
+		concept.setAnnotationStyleRefex(true);
 		addRelationship(concept, relParentPrimordial);
 		if (secondParent != null)
 		{
