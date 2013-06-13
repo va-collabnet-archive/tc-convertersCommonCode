@@ -12,5 +12,6 @@ public class BPT_Qualifiers extends PropertyType
 	public BPT_Qualifiers()
 	{
 		super("Qualifier Types");
+		indexRefsetMembers = true;
 	}
 }

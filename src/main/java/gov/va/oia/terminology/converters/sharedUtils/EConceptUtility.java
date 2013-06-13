@@ -787,17 +787,17 @@ public class EConceptUtility
 	/**
 	 * Utility method to build and store a metadata concept.
 	 */
-	public EConcept createAndStoreMetaDataConcept(String name, UUID relParentPrimordial, DataOutputStream dos) throws Exception
+	public EConcept createAndStoreMetaDataConcept(String name, boolean indexRefsetMembers, UUID relParentPrimordial, DataOutputStream dos) throws Exception
 	{
-		return createMetaDataConcept(ConverterUUID.createNamespaceUUIDFromString(name), name, null, null, relParentPrimordial, null, null, dos);
+		return createMetaDataConcept(ConverterUUID.createNamespaceUUIDFromString(name), name, null, null, indexRefsetMembers, relParentPrimordial, null, null, dos);
 	}
 
 	/**
 	 * Utility method to build and store a metadata concept.
 	 */
-	public EConcept createAndStoreMetaDataConcept(UUID primordial, String name, UUID relParentPrimordial, DataOutputStream dos) throws Exception
+	public EConcept createAndStoreMetaDataConcept(UUID primordial, String name, boolean indexRefsetMembers, UUID relParentPrimordial, DataOutputStream dos) throws Exception
 	{
-		return createMetaDataConcept(primordial, name, null, null, relParentPrimordial, null, null, dos);
+		return createMetaDataConcept(primordial, name, null, null, indexRefsetMembers, relParentPrimordial, null, null, dos);
 	}
 
 	/**
@@ -807,12 +807,12 @@ public class EConceptUtility
 	 * @param secondParent - optional
 	 */
 	public EConcept createMetaDataConcept(UUID primordial, String fsnName, String preferredName, String definition, 
-			UUID relParentPrimordial, UUID secondParent, Property sourceProperty, DataOutputStream dos)
+			boolean indexRefsetMembers, UUID relParentPrimordial, UUID secondParent, Property sourceProperty, DataOutputStream dos)
 			throws Exception
 	{
 		EConcept concept = createConcept(primordial, fsnName);
-		concept.setAnnotationIndexStyleRefex(true);  //Make sure any annotations that we add to this concept get indexed
-		concept.setAnnotationStyleRefex(true);
+		concept.setAnnotationIndexStyleRefex(indexRefsetMembers);  //Make sure any annotations that we add to this concept get indexed
+		concept.setAnnotationStyleRefex(indexRefsetMembers);
 		addRelationship(concept, relParentPrimordial);
 		if (secondParent != null)
 		{
@@ -864,7 +864,7 @@ public class EConceptUtility
 			{
 				continue;
 			}
-			createAndStoreMetaDataConcept(pt.getPropertyTypeUUID(), pt.getPropertyTypeDescription(), parentPrimordial, dos);
+			createAndStoreMetaDataConcept(pt.getPropertyTypeUUID(), pt.getPropertyTypeDescription(), pt.getIndexRefsetMembers(), parentPrimordial, dos);
 			UUID secondParent = null;
 			if (pt instanceof BPT_Refsets)
 			{
@@ -890,7 +890,7 @@ public class EConceptUtility
 			{
 				//In the case of refsets, don't store these  yet.  User must manually store refsets after they have been populated.
 				createMetaDataConcept(p.getUUID(), p.getSourcePropertyNameFSN(), p.getSourcePropertyPreferredName(), p.getSourcePropertyDefinition(), 
-						pt.getPropertyTypeUUID(), secondParent, p, (pt instanceof BPT_Refsets ? null : dos));
+						pt.getIndexRefsetMembers(), pt.getPropertyTypeUUID(), secondParent, p, (pt instanceof BPT_Refsets ? null : dos));
 			}
 		}
 	}
@@ -914,11 +914,11 @@ public class EConceptUtility
 		//Create a concept under "Reference set (foundation metadata concept)"  7e38cd2d-6f1a-3a81-be0b-21e6090573c2
 		//Now create the description type refset bucket.  UUID should always be the same - not terminology specific.  This should come from the WB, eventually.
 		UUID uuid = Type5UuidFactory.get(refsetSynonymName + " (foundation metadata concept)");
-		createMetaDataConcept(uuid, refsetSynonymName + " (foundation metadata concept)", refsetSynonymName, null,
+		createMetaDataConcept(uuid, refsetSynonymName + " (foundation metadata concept)", refsetSynonymName, null, false,
 				UUID.fromString("7e38cd2d-6f1a-3a81-be0b-21e6090573c2"), null, null, dos);
 		
 		//Now create the terminology specific refset type as a child
-		createAndStoreMetaDataConcept(pt.getPropertyTypeReferenceSetUUID(), pt.getPropertyTypeReferenceSetName(), uuid, dos);
+		createAndStoreMetaDataConcept(pt.getPropertyTypeReferenceSetUUID(), pt.getPropertyTypeReferenceSetName(), false, uuid, dos);
 		ConverterUUID.addMapping(pt.getPropertyTypeReferenceSetName(), pt.getPropertyTypeReferenceSetUUID());
 		
 		//TODO we shouldn't have to create this concept in the future - two new concepts have been added to the US extension for this purpose.
@@ -928,11 +928,11 @@ public class EConceptUtility
 		//Finally, create the Reference set attribute children that we will put the actual properties under
 		//Create the concept under "Reference set attribute (foundation metadata concept)"  7e52203e-8a35-3121-b2e7-b783b34d97f2
 		uuid = Type5UuidFactory.get(refsetValueParentSynonynmName + " (foundation metadata concept)");
-		createMetaDataConcept(uuid, refsetValueParentSynonynmName + " (foundation metadata concept)", refsetValueParentSynonynmName, null, 
+		createMetaDataConcept(uuid, refsetValueParentSynonynmName + " (foundation metadata concept)", refsetValueParentSynonynmName, null, false,
 				UUID.fromString("7e52203e-8a35-3121-b2e7-b783b34d97f2"), null, null, dos).getPrimordialUuid();
 		
 		//Now create the terminology specific refset type as a child - very similar to above, but since this isn't the refset concept, just an organization
 		//concept, I add an 's' to make it plural, and use a different UUID (calculated from the new plural)
-		return createAndStoreMetaDataConcept(pt.getPropertyTypeReferenceSetName() + "s", uuid, dos).getPrimordialUuid();
+		return createAndStoreMetaDataConcept(pt.getPropertyTypeReferenceSetName() + "s", false, uuid, dos).getPrimordialUuid();
 	}
 }

@@ -28,6 +28,7 @@ public class BPT_ContentVersion extends PropertyType
 	public BPT_ContentVersion()
 	{
 		super("Content Version");
+		indexRefsetMembers = true;
 		for (BaseContentVersion cv : BaseContentVersion.values())
 		{
 			addProperty(cv.getProperty());

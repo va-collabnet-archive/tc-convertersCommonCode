@@ -12,5 +12,6 @@ public class BPT_Attributes extends PropertyType
 	public BPT_Attributes()
 	{
 		super("Attribute Types");
+		indexRefsetMembers = true;
 	}
 }

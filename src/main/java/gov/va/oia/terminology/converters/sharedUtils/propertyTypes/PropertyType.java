@@ -24,6 +24,7 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 	private String propertyTypeDescription_;
 	private String propertyTypeReferenceSetName_;
 	private UUID propertyTypeReferenceSetUUID;
+	protected boolean indexRefsetMembers = false;
 
 	private Map<String, Property> properties_;
 
@@ -162,6 +163,11 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 	public String getPropertyTypeReferenceSetName()
 	{
 		return propertyTypeReferenceSetName_;
+	}
+	
+	public boolean getIndexRefsetMembers()
+	{
+		return indexRefsetMembers;
 	}
 
 	@Override
