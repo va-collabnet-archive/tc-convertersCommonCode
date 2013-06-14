@@ -128,7 +128,7 @@ public class EConceptUtility
 		pathRefsetConcept.writeExternal(dos);
 		
 		terminologyPathUUID_ = c.getPrimordialUuid();  //Now change the path to our new path concept
-		ConsoleUtil.println("The path to be specified in the workbench assembly pom is '" + pathName + "'");
+		ConsoleUtil.println("The path to be specified in the workbench baseline pom (or assembly pom) is '" + pathName + "' - " + terminologyPathUUID_);
 	}
 
 	/**
