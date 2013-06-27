@@ -93,6 +93,8 @@ public class EConceptUtility
 	private UUID terminologyPathUUID_ = workbenchAuxilary;  //start with this.
 
 	private LoadStats ls_ = new LoadStats();
+	
+	//TODO replace all of the random-gen code with gen code based on the content being added (and the uuid of the concept it is attached to - maybe?
 
 	/**
 	 * Creates and stores the path concept.
@@ -765,7 +767,7 @@ public class EConceptUtility
 		if (temp != null)
 		{
 			String[] parts = temp.split(":");
-			if (parts != null && parts.length > 0)
+			if (parts != null && parts.length > 1)
 			{
 				return parts[parts.length - 1];
 			}
