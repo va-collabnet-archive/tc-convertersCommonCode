@@ -7,31 +7,14 @@ package gov.va.oia.terminology.converters.sharedUtils.propertyTypes;
  */
 public class BPT_ContentVersion extends PropertyType
 {
-	public enum BaseContentVersion
-	{
-		RELEASE("Release"), LOADER_VERSION("Loader Version");
-
-		private Property property;
-
-		private BaseContentVersion(String niceName)
-		{
-			// Don't know the owner yet - will be autofilled when we add this to the parent, below.
-			property = new Property(null, niceName);
-		}
-
-		public Property getProperty()
-		{
-			return property;
-		}
-	}
+	public Property RELEASE;
+	public Property LOADER_VERSION;
 
 	public BPT_ContentVersion()
 	{
 		super("Content Version");
 		indexRefsetMembers = true;
-		for (BaseContentVersion cv : BaseContentVersion.values())
-		{
-			addProperty(cv.getProperty());
-		}
+		RELEASE = addProperty("Release");
+		LOADER_VERSION = addProperty("Loader Version");
 	}
 }
