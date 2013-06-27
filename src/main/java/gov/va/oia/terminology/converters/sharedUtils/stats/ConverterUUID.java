@@ -1,5 +1,6 @@
 package gov.va.oia.terminology.converters.sharedUtils.stats;
 
+import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -103,10 +104,10 @@ public class ConverterUUID
 
 		if (!disableUUIDMap_)
 		{
-			String putResult = masterUUIDMap_.put(uuid, "Random: " + reasonToStoreForRandom);
+			String putResult = masterUUIDMap_.put(uuid, "Random:" + reasonToStoreForRandom);
 			if (putResult != null)
 			{
-				throw new RuntimeException("Just made a duplicate UUID! 'Random: " + reasonToStoreForRandom + "' -> " + uuid);
+				throw new RuntimeException("Just made a duplicate UUID! 'Random:" + reasonToStoreForRandom + "' -> " + uuid);
 			}
 		}
 		return uuid;
@@ -141,6 +142,11 @@ public class ConverterUUID
 		br.close();
 	}
 
+	public static void clearCache()
+	{
+		masterUUIDMap_.clear();
+	}
+	
 	/**
 	 * Allow this map to be updated with UUIDs that were not generated via this utility class
 	 */
@@ -162,7 +168,7 @@ public class ConverterUUID
 		//I can't think of a use case where someone should do this, so throw error.
 		if (namespace_ != null)
 		{
-			throw new RuntimeException("Namespace is already configured!");
+			ConsoleUtil.println("Reconfiguring Namespace!");
 		}
 		namespace_ = namespace;
 	}
