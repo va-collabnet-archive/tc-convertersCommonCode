@@ -163,6 +163,11 @@ public class ConverterUUID
 		masterUUIDMap_.remove(uuid);
 	}
 	
+	public static UUID getNamespace()
+	{
+		return namespace_;
+	}
+	
 	public static void configureNamespace(UUID namespace)
 	{
 		//I can't think of a use case where someone should do this, so throw error.

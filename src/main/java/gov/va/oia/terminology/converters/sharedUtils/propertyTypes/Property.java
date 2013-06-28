@@ -17,7 +17,7 @@ public class Property
 	
 	private ArrayList<ConceptCreationNotificationListener> listeners_ = new ArrayList<>(1);
 
-	protected Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
+	public Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
 	{
 		this.owner_ = owner;
 		this.sourcePropertyNameFSN_ = sourcePropertyNameFSN;

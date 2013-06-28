@@ -18,8 +18,8 @@ public class BPT_Descriptions extends PropertyType
 	//Then, the first found description will be the 'preferred' description - the rest will be 'acceptable'.
 	
 	public static final int FSN = 0;
-	public static final int SYNONYM = 20;
-	public static final int DEFINITION = 40;
+	public static final int SYNONYM = 200;
+	public static final int DEFINITION = 400;
 
 	public BPT_Descriptions(String terminologyName)
 	{
