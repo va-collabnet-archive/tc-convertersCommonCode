@@ -586,6 +586,10 @@ public class EConceptUtility
 		{
 			ls_.addAnnotation(getOriginStringForUuid(((TkRefsetStrMember) component).getRefexUuid()), getOriginStringForUuid(refsetUuid));
 		}
+		else if (component instanceof TkRefexUuidMember)
+		{
+			ls_.addAnnotation(getOriginStringForUuid(((TkRefexUuidMember) component).getRefexUuid()), getOriginStringForUuid(refsetUuid));
+		}
 		else
 		{
 			ls_.addAnnotation(getOriginStringForUuid(component.getPrimordialComponentUuid()), getOriginStringForUuid(refsetUuid));
