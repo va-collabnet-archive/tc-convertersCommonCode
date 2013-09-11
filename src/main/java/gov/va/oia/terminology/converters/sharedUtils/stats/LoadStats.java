@@ -19,6 +19,8 @@ public class LoadStats
 	private TreeMap<String, Integer> refsetMembers_ = new TreeMap<String, Integer>();
 	private TreeMap<String, Integer> relationships_ = new TreeMap<String, Integer>();
 	private TreeMap<String, TreeMap<String, Integer>> annotations_ = new TreeMap<String, TreeMap<String, Integer>>();
+	
+	private Object syncLock = new Object();
 
 	public void addConcept()
 	{
@@ -139,38 +141,44 @@ public class LoadStats
 
 	private void increment(TreeMap<String, Integer> dataHolder, String type)
 	{
-		Integer i = dataHolder.get(type);
-		if (i == null)
+		synchronized (syncLock)
 		{
-			i = new Integer(1);
+			Integer i = dataHolder.get(type);
+			if (i == null)
+			{
+				i = new Integer(1);
+			}
+			else
+			{
+				i++;
+			}
+			dataHolder.put(type, i);
 		}
-		else
-		{
-			i++;
-		}
-		dataHolder.put(type, i);
 	}
 
 	private void increment(TreeMap<String, TreeMap<String, Integer>> dataHolder, String annotatedType, String type)
 	{
-		TreeMap<String, Integer> map = dataHolder.get(annotatedType);
-
-		if (map == null)
+		synchronized (syncLock)
 		{
-			map = new TreeMap<String, Integer>();
+			TreeMap<String, Integer> map = dataHolder.get(annotatedType);
+	
+			if (map == null)
+			{
+				map = new TreeMap<String, Integer>();
+			}
+	
+			Integer i = map.get(type);
+	
+			if (i == null)
+			{
+				i = new Integer(1);
+			}
+			else
+			{
+				i++;
+			}
+			map.put(type, i);
+			dataHolder.put(annotatedType, map);
 		}
-
-		Integer i = map.get(type);
-
-		if (i == null)
-		{
-			i = new Integer(1);
-		}
-		else
-		{
-			i++;
-		}
-		map.put(type, i);
-		dataHolder.put(annotatedType, map);
 	}
 }
