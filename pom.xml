@@ -10,7 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<wb-toolkit.version>2.32-trek-no-jini-va-1.4</wb-toolkit.version>
+		<wb-toolkit.version>2.32-trek-no-jini-va-1.5</wb-toolkit.version>
 	</properties>
 
 	<!--scm>
