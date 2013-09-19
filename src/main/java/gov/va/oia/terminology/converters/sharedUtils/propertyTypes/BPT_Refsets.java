@@ -13,7 +13,7 @@ public class BPT_Refsets extends PropertyType
 {
 	private HashMap<String, EConcept> conceptMap_;  //We store concepts here, because by their nature, refsets can't be written until they are populated
 	//this happens much later in the conversion cycle.
-	private EConcept refsetIdentityParent_;  //Typically "Term-name Refsets" under "VA Refsets"
+	private EConcept refsetIdentityParent_;  //Typically "Term-name Refsets" under "Project Refsets"
 
 	public BPT_Refsets(String terminologyName)
 	{

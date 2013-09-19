@@ -25,6 +25,8 @@ import org.ihtsdo.etypes.EConceptAttributes;
 import org.ihtsdo.etypes.EIdentifierLong;
 import org.ihtsdo.etypes.EIdentifierString;
 import org.ihtsdo.etypes.EIdentifierUuid;
+import org.ihtsdo.tk.binding.snomed.RefsetAux;
+import org.ihtsdo.tk.binding.snomed.Snomed;
 import org.ihtsdo.tk.binding.snomed.SnomedMetadataRf2;
 import org.ihtsdo.tk.binding.snomed.TermAux;
 import org.ihtsdo.tk.dto.concept.component.TkComponent;
@@ -49,43 +51,26 @@ import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 public class EConceptUtility
 {
 	public static enum DescriptionType{FSN, SYNONYM, DEFINITION};
-	public static final UUID isARelUuid_;
-	
-	//What a pain.  WB constants are defined in such a way that they throw exceptions.  Sigh.
-	static
-	{
-		try
-		{
-			//TODO we want to transition to the other "Is a" at some point - but work is underway to get rid of this 
-			//dual is-a mess in the WB, so, not changing it for now.
-			isARelUuid_ = ArchitectonicAuxiliary.Concept.IS_A_REL.getPrimoridalUid();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException("GAK!");
-		}
-	}
-	
+	public final UUID isARelUuid_ = Snomed.IS_A.getUuids()[0];
 	public final UUID authorUuid_ = ArchitectonicAuxiliary.Concept.USER.getPrimoridalUid();
 	public final UUID statusCurrentUuid_ = SnomedMetadataRf2.ACTIVE_VALUE_RF2.getUuids()[0];
 	public final UUID statusRetiredUuid_ = SnomedMetadataRf2.INACTIVE_VALUE_RF2.getUuids()[0];
 	public final UUID synonymUuid_ = SnomedMetadataRf2.SYNONYM_RF2.getUuids()[0];
-	//TODO find constant for this "Definition (core metadata concept)"
-	public final UUID definitionUuid_ = UUID.fromString("700546a3-09c7-3fc2-9eb9-53d318659a09");   
+	public final UUID definitionUuid_ = SnomedMetadataRf2.DEFINITION_RF2.getUuids()[0];
 	public final UUID fullySpecifiedNameUuid_ = SnomedMetadataRf2.FULLY_SPECIFIED_NAME_RF2.getUuids()[0];
 	public final UUID descriptionAcceptableUuid_ = SnomedMetadataRf2.ACCEPTABLE_RF2.getUuids()[0];
 	public final UUID descriptionPreferredUuid_ = SnomedMetadataRf2.PREFERRED_RF2.getUuids()[0];
 	public final UUID usEnRefsetUuid_ = SnomedMetadataRf2.US_ENGLISH_REFSET_RF2.getUuids()[0];
 	public final UUID definingCharacteristicUuid_ = SnomedMetadataRf2.STATED_RELATIONSHIP_RF2.getUuids()[0];
-	public final UUID notRefinableUuid = ArchitectonicAuxiliary.Concept.NOT_REFINABLE.getPrimoridalUid();
+	public final UUID notRefinableUuid = SnomedMetadataRf2.NOT_REFINABLE_RF2.getUuids()[0];
 	public final UUID moduleUuid_ = TkRevision.unspecifiedModuleUuid;
 	public final UUID refsetMemberTypeNormalMemberUuid_ = RefsetAuxiliary.Concept.NORMAL_MEMBER.getPrimoridalUid();
-	public final String VA_REFSET_NAME = "VA Refsets";
-	public final UUID pathOriginRefSetUUID_ = UUID.fromString("1239b874-41b4-32a1-981f-88b448829b4b");  //TODO find a constant for this  "Path origin reference set"
-	public final UUID pathRefSetUUID_ = UUID.fromString("fd9d47b7-c0a4-3eea-b3ab-2b5a3f9e888f");  //TODO find a constant for this "Path reference set"
+	public final String PROJECT_REFSETS_NAME = "Project Refsets";
+	public final UUID PROJECT_REFSETS_UUID = UUID.fromString("7fe3e31f-a969-53ff-8702-f7837e4a03d9");  //This is Type5UuidFactory.PATH_ID_FROM_FS_DESC, "Project Refsets")
+	public final UUID pathOriginRefSetUUID_ = RefsetAux.PATH_ORIGIN_REFEST.getUuids()[0];
+	public final UUID pathRefSetUUID_ = RefsetAux.PATH_REFSET.getUuids()[0];
 	public final UUID pathUUID_ = ArchitectonicAuxiliary.Concept.PATH.getPrimoridalUid();
 	public final UUID pathReleaseUUID_ =  ArchitectonicAuxiliary.Concept.RELEASE.getPrimoridalUid();
-	public final UUID VA_REFSET_UUID = ConverterUUID.createNamespaceUUIDFromString(null, "gov.va.med.term.refset." + VA_REFSET_NAME);
 	public final UUID workbenchAuxilary = TermAux.WB_AUX_PATH.getUuids()[0];
 	public final long defaultTime_ = System.currentTimeMillis();
 	
@@ -210,12 +195,12 @@ public class EConceptUtility
 	}
 
 	/**
-	 * Create a concept with a UUID set from "gov.va.refset.VA Refsets" (VA_REFSET_UUID) and a name of "VA Refsets" (VA_REFSET_NAME)
+	 * Create a concept with a UUID set from "Project Refsets" (PROJECT_REFSETS_UUID) and a name of "Project Refsets" (PROJECT_REFSETS_NAME)
 	 * nested under ConceptConstants.REFSET
 	 */
 	private EConcept createVARefsetRootConcept()
 	{
-		return createConcept(VA_REFSET_UUID, VA_REFSET_NAME, ConceptConstants.REFSET.getUuids()[0]);
+		return createConcept(PROJECT_REFSETS_UUID, PROJECT_REFSETS_NAME, ConceptConstants.REFSET.getUuids()[0]);
 	}
 
 	/**
