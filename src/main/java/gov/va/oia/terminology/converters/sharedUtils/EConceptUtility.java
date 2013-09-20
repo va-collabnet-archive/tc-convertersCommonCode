@@ -51,7 +51,7 @@ import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 public class EConceptUtility
 {
 	public static enum DescriptionType{FSN, SYNONYM, DEFINITION};
-	public final UUID isARelUuid_ = Snomed.IS_A.getUuids()[0];
+	public static final UUID isARelUuid_ = Snomed.IS_A.getUuids()[0];
 	public final UUID authorUuid_ = ArchitectonicAuxiliary.Concept.USER.getPrimoridalUid();
 	public final UUID statusCurrentUuid_ = SnomedMetadataRf2.ACTIVE_VALUE_RF2.getUuids()[0];
 	public final UUID statusRetiredUuid_ = SnomedMetadataRf2.INACTIVE_VALUE_RF2.getUuids()[0];
