@@ -193,6 +193,33 @@ public class EConceptUtility
 		ls_.addConcept();
 		return eConcept;
 	}
+	
+	/**
+	 * Clones the minimum required items for creating and merging a concept - except the path - path is set per normal 
+	 */
+	public EConcept createSkeletonClone(EConcept cloneSource)
+	{
+		if (cloneSource == null)
+		{
+			return null;
+		}
+		EConcept eConcept = new EConcept();
+		eConcept.setPrimordialUuid(cloneSource.getPrimordialUuid());
+		EConceptAttributes conceptAttributes = new EConceptAttributes();
+		if (cloneSource.getConceptAttributes() != null)
+		{
+			conceptAttributes.setDefined(cloneSource.getConceptAttributes().isDefined());
+			conceptAttributes.setPrimordialComponentUuid(cloneSource.getConceptAttributes().getPrimordialComponentUuid());
+			conceptAttributes.setAuthorUuid(cloneSource.getConceptAttributes().getAuthorUuid());
+			conceptAttributes.setModuleUuid(cloneSource.getConceptAttributes().getModuleUuid());
+			conceptAttributes.setStatusUuid(cloneSource.getConceptAttributes().getStatusUuid());
+			conceptAttributes.setTime(cloneSource.getConceptAttributes().getTime());
+		}
+		conceptAttributes.setPathUuid(terminologyPathUUID_);
+		eConcept.setConceptAttributes(conceptAttributes);
+		ls_.addConceptClone();
+		return eConcept;
+	}
 
 	/**
 	 * Create a concept with a UUID set from "Project Refsets" (PROJECT_REFSETS_UUID) and a name of "Project Refsets" (PROJECT_REFSETS_NAME)
