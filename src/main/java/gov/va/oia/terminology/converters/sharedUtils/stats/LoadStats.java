@@ -3,6 +3,7 @@ package gov.va.oia.terminology.converters.sharedUtils.stats;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Keep counts on all of the types of things that are converted.
@@ -12,7 +13,8 @@ import java.util.TreeMap;
 
 public class LoadStats
 {
-	private int concepts_ = 0;
+	private AtomicInteger concepts_ = new AtomicInteger();
+	private AtomicInteger clonedConcepts_ = new AtomicInteger();
 	private TreeMap<String, Integer> descriptions_ = new TreeMap<String, Integer>();
 	private TreeMap<String, Integer> conceptIds_ = new TreeMap<String, Integer>();
 	private TreeMap<String, TreeMap<String, Integer>> componentIds_ = new TreeMap<String, TreeMap<String, Integer>>();
@@ -24,12 +26,22 @@ public class LoadStats
 
 	public void addConcept()
 	{
-		concepts_++;
+		concepts_.incrementAndGet();
 	}
 
 	public int getConceptCount()
 	{
-		return concepts_;
+		return concepts_.get();
+	}
+	
+	public void addConceptClone()
+	{
+		clonedConcepts_.incrementAndGet();
+	}
+
+	public int getClonedConceptCount()
+	{
+		return clonedConcepts_.get();
 	}
 
 	public void addDescription(String descName)
@@ -66,7 +78,12 @@ public class LoadStats
 	{
 		ArrayList<String> result = new ArrayList<String>();
 
-		result.add("Concepts: " + concepts_);
+		result.add("Concepts: " + concepts_.get());
+		
+		if (clonedConcepts_.get() > 0)
+		{
+			result.add("Cloned Concepts: " + clonedConcepts_.get());
+		}
 
 		int sum = 0;
 		for (Map.Entry<String, Integer> value : relationships_.entrySet())
