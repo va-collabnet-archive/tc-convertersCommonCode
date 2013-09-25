@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.lang.StringUtils;
 import org.ihtsdo.etypes.EConcept;
 
 /**
@@ -27,6 +28,8 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 	protected boolean indexRefsetMembers = false;
 
 	private Map<String, Property> properties_;
+	
+	private Map<String, String> altNamePropertyMap_ = null;
 
 	public static void setSourceVersion(int version)
 	{
@@ -71,7 +74,16 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 
 	public Property getProperty(String propertyName)
 	{
-		return properties_.get(propertyName);
+		Property p = properties_.get(propertyName);
+		if (p == null && altNamePropertyMap_ != null)
+		{
+			String altKey = altNamePropertyMap_.get(propertyName);
+			if (altKey != null)
+			{
+				p = properties_.get(altKey);
+			}
+		}
+		return p;
 	}
 
 	public Set<String> getPropertyNames()
@@ -86,7 +98,16 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 
 	public boolean containsProperty(String propertyName)
 	{
-		return properties_.containsKey(propertyName);
+		boolean result = properties_.containsKey(propertyName);
+		if (!result && altNamePropertyMap_ != null)
+		{
+			String altKey = altNamePropertyMap_.get(propertyName);
+			if (altKey != null)
+			{
+				result = properties_.containsKey(altKey);
+			}
+		}
+		return result;
 	}
 
 	public Property addProperty(Property property)
@@ -94,6 +115,14 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 		property.setOwner(this);
 		property.registerConceptCreationListener(this);
 		properties_.put(property.getSourcePropertyNameFSN(), property);
+		if (altNamePropertyMap_ != null && StringUtils.isNotEmpty(property.getSourcePropertyAltName()))
+		{
+			String s = altNamePropertyMap_.put(property.getSourcePropertyAltName(), property.getSourcePropertyNameFSN());
+			if (s != null)
+			{
+				throw new RuntimeException("Alt Indexing Error - duplicate!");
+			}
+		}
 		return property;
 	}
 
@@ -112,14 +141,26 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, false);
 	}
 	
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyAltName, String sourcePropertyDefinition)
+	{
+		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyAltName, sourcePropertyDefinition, false, -1);
+	}
+	
 	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled)
 	{
 		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, -1);
 	}
-
+	
 	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
 	{
-		return addProperty(new Property(this, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, disabled, propertySubType));
+		return addProperty(sourcePropertyNameFSN, sourcePropertyPreferredName, null, sourcePropertyDefinition, disabled, propertySubType);
+	}
+
+	public Property addProperty(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyAltName, String sourcePropertyDefinition, 
+			boolean disabled, int propertySubType)
+	{
+		return addProperty(new Property(this, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyAltName, sourcePropertyDefinition, disabled, 
+				propertySubType));
 	}
 
 	/**
@@ -168,6 +209,17 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 	public boolean getIndexRefsetMembers()
 	{
 		return indexRefsetMembers;
+	}
+	
+	/**
+	 * Enable index and lookup of properties by their altName field
+	 */
+	public void indexByAltNames()
+	{
+		if (altNamePropertyMap_ == null)
+		{
+			altNamePropertyMap_ = new HashMap<>();
+		}
 	}
 
 	@Override

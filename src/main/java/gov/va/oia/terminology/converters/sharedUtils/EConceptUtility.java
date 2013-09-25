@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.apache.commons.lang.StringUtils;
 import org.dwfa.ace.refset.ConceptConstants;
 import org.dwfa.cement.ArchitectonicAuxiliary;
 import org.dwfa.cement.RefsetAuxiliary;
@@ -807,7 +808,7 @@ public class EConceptUtility
 	 */
 	public EConcept createAndStoreMetaDataConcept(String name, boolean indexRefsetMembers, UUID relParentPrimordial, DataOutputStream dos) throws Exception
 	{
-		return createMetaDataConcept(ConverterUUID.createNamespaceUUIDFromString(name), name, null, null, indexRefsetMembers, relParentPrimordial, null, null, dos);
+		return createMetaDataConcept(ConverterUUID.createNamespaceUUIDFromString(name), name, null, null, null, indexRefsetMembers, relParentPrimordial, null, null, dos);
 	}
 
 	/**
@@ -815,7 +816,7 @@ public class EConceptUtility
 	 */
 	public EConcept createAndStoreMetaDataConcept(UUID primordial, String name, boolean indexRefsetMembers, UUID relParentPrimordial, DataOutputStream dos) throws Exception
 	{
-		return createMetaDataConcept(primordial, name, null, null, indexRefsetMembers, relParentPrimordial, null, null, dos);
+		return createMetaDataConcept(primordial, name, null, null, null, indexRefsetMembers, relParentPrimordial, null, null, dos);
 	}
 
 	/**
@@ -824,7 +825,7 @@ public class EConceptUtility
 	 * @param dos - optional - does not store when not provided
 	 * @param secondParent - optional
 	 */
-	public EConcept createMetaDataConcept(UUID primordial, String fsnName, String preferredName, String definition, 
+	public EConcept createMetaDataConcept(UUID primordial, String fsnName, String preferredName, String altName, String definition, 
 			boolean indexRefsetMembers, UUID relParentPrimordial, UUID secondParent, Property sourceProperty, DataOutputStream dos)
 			throws Exception
 	{
@@ -836,11 +837,15 @@ public class EConceptUtility
 		{
 			addRelationship(concept, secondParent);
 		}
-		if (preferredName != null)
+		if (StringUtils.isNotEmpty(preferredName))
 		{
 			addDescription(concept, preferredName, DescriptionType.SYNONYM, true, null, null, false);
 		}
-		if (definition != null)
+		if (StringUtils.isNotEmpty(altName))
+		{
+			addDescription(concept, altName, DescriptionType.SYNONYM, false, null, null, false);
+		}
+		if (StringUtils.isNotEmpty(definition))
 		{
 			addDescription(concept, definition, DescriptionType.DEFINITION, true, null, null, false);
 		}
@@ -907,8 +912,9 @@ public class EConceptUtility
 			for (Property p : pt.getProperties())
 			{
 				//In the case of refsets, don't store these  yet.  User must manually store refsets after they have been populated.
-				createMetaDataConcept(p.getUUID(), p.getSourcePropertyNameFSN(), p.getSourcePropertyPreferredName(), p.getSourcePropertyDefinition(), 
-						pt.getIndexRefsetMembers(), pt.getPropertyTypeUUID(), secondParent, p, (pt instanceof BPT_Refsets ? null : dos));
+				createMetaDataConcept(p.getUUID(), p.getSourcePropertyNameFSN(), p.getSourcePropertyPreferredName(), p.getSourcePropertyAltName(), 
+						p.getSourcePropertyDefinition(), pt.getIndexRefsetMembers(), pt.getPropertyTypeUUID(), secondParent, p, 
+						(pt instanceof BPT_Refsets ? null : dos));
 			}
 		}
 	}

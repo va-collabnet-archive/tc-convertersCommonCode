@@ -8,6 +8,7 @@ public class Property
 {
 	private String sourcePropertyNameFSN_;
 	private String sourcePropertyPreferredName_;
+	private String sourcePropertyAltName_;
 	private String sourcePropertyDefinition_;
 	private boolean isDisabled_ = false;
 	private int propertySubType_ = Integer.MAX_VALUE;  //Used for subtypes of descriptions, at the moment - FSN, synonym, etc.
@@ -17,7 +18,8 @@ public class Property
 	
 	private ArrayList<ConceptCreationNotificationListener> listeners_ = new ArrayList<>(1);
 
-	public Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, boolean disabled, int propertySubType)
+	public Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyAltName, 
+			String sourcePropertyDefinition, boolean disabled, int propertySubType)
 	{
 		this.owner_ = owner;
 		this.sourcePropertyNameFSN_ = sourcePropertyNameFSN;
@@ -29,6 +31,7 @@ public class Property
 		{
 			this.sourcePropertyPreferredName_ = sourcePropertyPreferredName;
 		}
+		this.sourcePropertyAltName_ = sourcePropertyAltName;
 		this.sourcePropertyDefinition_ = sourcePropertyDefinition;
 		this.isDisabled_ = disabled;
 		this.propertySubType_ = propertySubType;
@@ -36,22 +39,22 @@ public class Property
 
 	public Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, int propertySubType)
 	{
-		this(owner, sourcePropertyNameFSN, sourcePropertyPreferredName, null, false, propertySubType);
+		this(owner, sourcePropertyNameFSN, sourcePropertyPreferredName, null, null, false, propertySubType);
 	}
 	
 	public Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName, boolean disabled)
 	{
-		this(owner, sourcePropertyNameFSN, sourcePropertyPreferredName, null, disabled, Integer.MAX_VALUE);
+		this(owner, sourcePropertyNameFSN, sourcePropertyPreferredName, null, null, disabled, Integer.MAX_VALUE);
 	}
 
 	public Property(PropertyType owner, String sourcePropertyNameFSN, String sourcePropertyPreferredName)
 	{
-		this(owner, sourcePropertyNameFSN, sourcePropertyPreferredName, null, false, Integer.MAX_VALUE);
+		this(owner, sourcePropertyNameFSN, sourcePropertyPreferredName, null, null, false, Integer.MAX_VALUE);
 	}
 
 	public Property(PropertyType owner, String sourcePropertyNameFSN)
 	{
-		this(owner, sourcePropertyNameFSN, sourcePropertyNameFSN, null, false, Integer.MAX_VALUE);
+		this(owner, sourcePropertyNameFSN, sourcePropertyNameFSN, null, null, false, Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -59,7 +62,16 @@ public class Property
 	 */
 	public Property(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyDefinition, UUID wbRelType)
 	{
-		this(null, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, false, Integer.MAX_VALUE);
+		this(null, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyDefinition, null, false, Integer.MAX_VALUE);
+		setWBPropertyType(wbRelType);
+	}
+	
+	/**
+	 * owner must be set via the set method after using this constructor!
+	 */
+	public Property(String sourcePropertyNameFSN, String sourcePropertyPreferredName, String sourcePropertyAltName, String sourcePropertyDefinition, UUID wbRelType)
+	{
+		this(null, sourcePropertyNameFSN, sourcePropertyPreferredName, sourcePropertyAltName, sourcePropertyDefinition, false, Integer.MAX_VALUE);
 		setWBPropertyType(wbRelType);
 	}
 
@@ -71,6 +83,11 @@ public class Property
 	public String getSourcePropertyPreferredName()
 	{
 		return sourcePropertyPreferredName_;
+	}
+	
+	public String getSourcePropertyAltName()
+	{
+		return sourcePropertyAltName_;
 	}
 	
 	public String getSourcePropertyDefinition()
