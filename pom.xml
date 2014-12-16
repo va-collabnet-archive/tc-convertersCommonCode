@@ -19,6 +19,18 @@
 		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/va-oia-terminology-converters/convertersCommonCode/trunk/</developerConnection>
 		<url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/convertersCommonCode/trunk/?root=va-oia-terminology-converters&amp;system=exsy1002</url>
 	</scm>
+	
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>Copyright Notice
+				This is a work of the U.S. Government and is not subject to copyright
+				protection in the United States. Foreign copyrights may apply.
+			</comments>
+		</license>
+	</licenses>
 
 	<dependencies>
 		<dependency>

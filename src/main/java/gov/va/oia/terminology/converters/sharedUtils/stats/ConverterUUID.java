@@ -1,6 +1,25 @@
+/**
+ * Copyright Notice
+ *
+ * This is a work of the U.S. Government and is not subject to copyright
+ * protection in the United States. Foreign copyrights may apply.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package gov.va.oia.terminology.converters.sharedUtils.stats;
 
 import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
+import gov.va.oia.terminology.converters.sharedUtils.ConverterBaseMojo;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +32,9 @@ import org.dwfa.util.id.Type5UuidFactory;
 /**
  * A utility class for generating UUIDs which keeps track of what was used to generate the UUIDs - which
  * can then be dumped to disk (or looked up by UUID)
+ * 
+ * The in-memory map can be disabled by setting the static flag here - or - with loaders that extend {@link ConverterBaseMojo}
+ * by setting the system property skipUUIDDebug to true - or in maven speak - '-DskipUUIDDebug' on the command line.
  * 
  * @author darmbrust
  */
