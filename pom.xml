@@ -32,6 +32,11 @@
 		</license>
 	</licenses>
 
+	<organization>
+		<name>U.S. Department of Veterans Affairs</name>
+		<url>www.va.gov</url>
+	</organization>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.ihtsdo</groupId>
