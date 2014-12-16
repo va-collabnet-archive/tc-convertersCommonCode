@@ -23,6 +23,32 @@ public class ConverterUUID
 	private static Hashtable<UUID, String> masterUUIDMap_ = new Hashtable<UUID, String>();
 	private static UUID namespace_ = null;
 
+	/**
+	 * Create a new Type5 UUID using the provided name as the seed in the configured namespace.
+	 * 
+	 * Throws a runtime exception if the namespace has not been configured.
+	 */
+	public static UUID createNamespaceUUIDFromStrings(String ... values)
+	{
+		StringBuilder uuidKey = new StringBuilder();
+		for (String s : values)
+		{
+			if (s != null)
+			{
+				uuidKey.append(s);
+				uuidKey.append("|");
+			}
+		}
+		if (uuidKey.length() > 1)
+		{
+			uuidKey.setLength(uuidKey.length() - 1);
+		}
+		else
+		{
+			throw new RuntimeException("No string provided!");
+		}
+		return createNamespaceUUIDFromString(uuidKey.toString());
+	}
 
 	/**
 	 * Create a new Type5 UUID using the provided name as the seed in the configured namespace.
@@ -94,26 +120,6 @@ public class ConverterUUID
 	}
 	
 	/**
-	 * Create a new Type4 Random UUID 
-	 * @param reasonToStoreForRandom - has no impact on the generation of the UUID - simply stored in the master UUID map 
-	 * and will be written out with the debug file when all created UUIDs are written out.
-	 */
-	public static UUID createRandomUUID(String reasonToStoreForRandom)
-	{
-		UUID uuid = UUID.randomUUID();
-
-		if (!disableUUIDMap_)
-		{
-			String putResult = masterUUIDMap_.put(uuid, "Random:" + reasonToStoreForRandom);
-			if (putResult != null)
-			{
-				throw new RuntimeException("Just made a duplicate UUID! 'Random:" + reasonToStoreForRandom + "' -> " + uuid);
-			}
-		}
-		return uuid;
-	}
-
-	/**
 	 * Return the string that was used to generate this UUID (if available - null if not)
 	 */
 	public static String getUUIDCreationString(UUID uuid)
@@ -133,6 +139,7 @@ public class ConverterUUID
 		BufferedWriter br = new BufferedWriter(new FileWriter(file));
 		if (disableUUIDMap_)
 		{
+			ConsoleUtil.println("UUID Debug map was disabled");
 			br.write("Note - the UUID debug feature was disabled, this file is incomplete" + System.getProperty("line.separator"));
 		}
 		for (Map.Entry<UUID, String> entry : masterUUIDMap_.entrySet())
@@ -170,7 +177,6 @@ public class ConverterUUID
 	
 	public static void configureNamespace(UUID namespace)
 	{
-		//I can't think of a use case where someone should do this, so throw error.
 		if (namespace_ != null)
 		{
 			ConsoleUtil.println("Reconfiguring Namespace!");
