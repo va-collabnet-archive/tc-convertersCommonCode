@@ -6,8 +6,9 @@
 	<groupId>gov.va.oia.terminology.converters</groupId>
 	<artifactId>convertersCommonCode</artifactId>
 	<version>3.0-SNAPSHOT</version>
-	<name>convertersCommonCode</name>
 	<packaging>jar</packaging>
+	
+	<name>Converters Common Code</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
