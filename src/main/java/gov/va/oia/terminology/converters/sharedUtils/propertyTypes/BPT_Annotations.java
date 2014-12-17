@@ -22,12 +22,12 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
 
 
 /**
- * Fields to treat as attributes
+ * Fields to treat as annotations (attributes)
  * @author Daniel Armbrust
  */
-public class BPT_Attributes extends PropertyType
+public class BPT_Annotations extends PropertyType
 {
-	public BPT_Attributes()
+	public BPT_Annotations()
 	{
 		super("Attribute Types");
 		indexRefsetMembers = true;

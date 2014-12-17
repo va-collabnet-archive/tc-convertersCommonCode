@@ -18,6 +18,7 @@
  */
 package gov.va.oia.terminology.converters.sharedUtils.propertyTypes;
 
+import java.util.List;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
 
 
@@ -31,5 +32,22 @@ public abstract class BPT_Skip extends PropertyType
 	public BPT_Skip(String description)
 	{
 		super(description);
+	}
+	
+	protected void addSkipListEntries(List<String>[] skipLists)
+	{
+		if (skipLists != null)
+		{
+			for (List<String> skipList : skipLists)
+			{
+				if (skipList != null)
+				{
+					for (String s : skipList)
+					{
+						addProperty(s);
+					}
+				}
+			}
+		}
 	}
 }

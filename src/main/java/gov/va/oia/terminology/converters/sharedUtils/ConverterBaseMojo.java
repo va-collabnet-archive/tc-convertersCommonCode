@@ -21,6 +21,7 @@ package gov.va.oia.terminology.converters.sharedUtils;
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.util.List;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -66,6 +67,36 @@ public abstract class ConverterBaseMojo extends AbstractMojo
 	@Parameter (required = false, defaultValue = "${skipUUIDDebug}")
 	private String createDebugUUIDMap;
 	
+	/**
+	 * An optional list of annotation type names which should be skipped during this transformation.
+	 */
+	@Parameter (required = false)
+	protected List<String> annotationSkipList;
+	
+	/**
+	 * An optional list of description type names which should be skipped during this transformation.
+	 */
+	@Parameter (required = false)
+	protected List<String> descriptionSkipList;
+	
+	/**
+	 * An optional list of id type names which should be skipped during this transformation.
+	 */
+	@Parameter (required = false)
+	protected List<String> idSkipList;
+	
+	/**
+	 * An optional list of member refset names which should be skipped during this transformation.
+	 */
+	@Parameter (required = false)
+	protected List<String> memberRefsetSkipList;
+	
+	/**
+	 * An optional list of relationship names which should be skipped during this transformation.
+	 */
+	@Parameter (required = false)
+	protected List<String> relationshipSkipList;
+	
 	protected DataOutputStream dos_;
 	protected EConceptUtility conceptUtility_;
 	
@@ -82,5 +113,67 @@ public abstract class ConverterBaseMojo extends AbstractMojo
 		{
 			outputDirectory.mkdirs();
 		}
+		
+		checkSkipListSupport();
+	}
+	
+	private boolean notEmpty(List<String> item)
+	{
+		if (item != null && item.size() > 0)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	private void checkSkipListSupport()
+	{
+		if (notEmpty(annotationSkipList))
+		{
+			supportsAnnotationSkipList();
+		}
+		if (notEmpty(idSkipList))
+		{
+			supportsIdSkipList();
+		}
+		if (notEmpty(memberRefsetSkipList))
+		{
+			supportsRefsetSkipList();
+		}
+		if (notEmpty(relationshipSkipList))
+		{
+			supportsRelationshipSkipList();
+		}
+		if (notEmpty(descriptionSkipList))
+		{
+			supportsDescriptionSkipList();
+		}
+	}
+	
+	//Individual loaders need to override the methods below, if they wish to support the various skiplists
+	
+	protected boolean supportsAnnotationSkipList()
+	{
+		throw new UnsupportedOperationException("This loader does not support an annotation skip list");
+	}
+	
+	protected boolean supportsIdSkipList()
+	{
+		throw new UnsupportedOperationException("This loader does not support an id skip list");
+	}
+	
+	protected boolean supportsRefsetSkipList()
+	{
+		throw new UnsupportedOperationException("This loader does not support a refset skip list");
+	}
+	
+	protected boolean supportsRelationshipSkipList()
+	{
+		throw new UnsupportedOperationException("This loader does not support a relationsihp skip list");
+	}
+	
+	protected boolean supportsDescriptionSkipList()
+	{
+		throw new UnsupportedOperationException("This loader does not support a description skip list");
 	}
 }

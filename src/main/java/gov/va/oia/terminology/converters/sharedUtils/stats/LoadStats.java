@@ -33,6 +33,7 @@ public class LoadStats
 {
 	private AtomicInteger concepts_ = new AtomicInteger();
 	private AtomicInteger clonedConcepts_ = new AtomicInteger();
+	private AtomicInteger skippedPropertiesCounter_ = new AtomicInteger();
 	private TreeMap<String, Integer> descriptions_ = new TreeMap<String, Integer>();
 	private TreeMap<String, Integer> conceptIds_ = new TreeMap<String, Integer>();
 	private TreeMap<String, TreeMap<String, Integer>> componentIds_ = new TreeMap<String, TreeMap<String, Integer>>();
@@ -60,6 +61,16 @@ public class LoadStats
 	public int getClonedConceptCount()
 	{
 		return clonedConcepts_.get();
+	}
+	
+	public void addSkippedProperty()
+	{
+		skippedPropertiesCounter_.incrementAndGet();
+	}
+
+	public int getSkippedPropertyCount()
+	{
+		return skippedPropertiesCounter_.get();
 	}
 
 	public void addDescription(String descName)
@@ -162,6 +173,11 @@ public class LoadStats
 			}
 		}
 		result.add("Annotations Total: " + sum);
+		
+		if (skippedPropertiesCounter_.get() > 0)
+		{
+			result.add("Skipped Properties: " + skippedPropertiesCounter_.get());
+		}
 
 		sum = 0;
 		for (Map.Entry<String, Integer> value : refsetMembers_.entrySet())

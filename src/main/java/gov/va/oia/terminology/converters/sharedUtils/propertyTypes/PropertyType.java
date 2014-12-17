@@ -18,9 +18,11 @@
  */
 package gov.va.oia.terminology.converters.sharedUtils.propertyTypes;
 
+import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -48,7 +50,9 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 	private Map<String, Property> properties_;
 	
 	private Map<String, String> altNamePropertyMap_ = null;
-
+	
+	protected List<String> skipList = null;
+	
 	public static void setSourceVersion(int version)
 	{
 		srcVersion_ = version;
@@ -130,6 +134,17 @@ public abstract class PropertyType implements ConceptCreationNotificationListene
 
 	public Property addProperty(Property property)
 	{
+		if (skipList != null)
+		{
+			for (String s : skipList)
+			{
+				if (property.getSourcePropertyNameFSN().equals(s))
+				{
+					ConsoleUtil.println("Skipping property '" + s + "' because of skip list configuration");
+					return property;
+				}
+			}
+		}
 		property.setOwner(this);
 		property.registerConceptCreationListener(this);
 		properties_.put(property.getSourcePropertyNameFSN(), property);

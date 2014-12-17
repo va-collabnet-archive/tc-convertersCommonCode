@@ -19,7 +19,7 @@
 package gov.va.oia.terminology.converters.sharedUtils;
 
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Descriptions;
-import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Refsets;
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_MemberRefsets;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Relations;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
@@ -938,14 +938,14 @@ public class EConceptUtility
 			}
 			createAndStoreMetaDataConcept(pt.getPropertyTypeUUID(), pt.getPropertyTypeDescription(), pt.getIndexRefsetMembers(), parentPrimordial, dos);
 			UUID secondParent = null;
-			if (pt instanceof BPT_Refsets)
+			if (pt instanceof BPT_MemberRefsets)
 			{
 				//Need to create the VA_Refsets concept, and create a terminology refset grouper, then use that as a second parent
 				EConcept refsetRoot = createVARefsetRootConcept();
 				refsetRoot.writeExternal(dos);
 				
 				EConcept refsetTermGroup = createConcept(pt.getPropertyTypeReferenceSetName(), refsetRoot.getPrimordialUuid());
-				((BPT_Refsets) pt).setRefsetIdentityParent(refsetTermGroup);
+				((BPT_MemberRefsets) pt).setRefsetIdentityParent(refsetTermGroup);
 				secondParent = refsetTermGroup.getPrimordialUuid(); 
 			}
 			else if (pt instanceof BPT_Descriptions)
@@ -963,12 +963,12 @@ public class EConceptUtility
 				//In the case of refsets, don't store these  yet.  User must manually store refsets after they have been populated.
 				createMetaDataConcept(p.getUUID(), p.getSourcePropertyNameFSN(), p.getSourcePropertyPreferredName(), p.getSourcePropertyAltName(), 
 						p.getSourcePropertyDefinition(), pt.getIndexRefsetMembers(), pt.getPropertyTypeUUID(), secondParent, p, 
-						(pt instanceof BPT_Refsets ? null : dos));
+						(pt instanceof BPT_MemberRefsets ? null : dos));
 			}
 		}
 	}
 	
-	public void storeRefsetConcepts(BPT_Refsets refsets, DataOutputStream dos) throws IOException
+	public void storeRefsetConcepts(BPT_MemberRefsets refsets, DataOutputStream dos) throws IOException
 	{
 		refsets.getRefsetIdentityParent().writeExternal(dos);
 		for (Property p : refsets.getProperties())
