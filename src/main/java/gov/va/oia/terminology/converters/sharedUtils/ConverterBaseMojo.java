@@ -62,7 +62,17 @@ public abstract class ConverterBaseMojo extends AbstractMojo
 	protected String converterResultVersion;
 	
 	/**
-	 * Set '-DskipUUIDDebug' on the command line, to disable the in memory UUID Debug map.
+	 * Set '-Dsdp' (skipUUIDDebugPublish) on the command line, to prevent the publishing of the 
+	 * debug UUID map (it will still be created, and written to a file)
+	 * 
+	 * At the moment, this param is never used in code - it is just used as a pom trigger (but documented here)
+	 */
+	@Parameter (required = false, defaultValue = "${sdp}")
+	private String createDebugUUIDMapSkipPublish;
+	
+	/**
+	 * Set '-DskipUUIDDebug' on the command line, to disable the in memory UUID Debug map entirely (this disables UUID duplicate detection, but
+	 * significantly cuts the required RAM overhead to run a loader).
 	 */
 	@Parameter (required = false, defaultValue = "${skipUUIDDebug}")
 	private String createDebugUUIDMap;

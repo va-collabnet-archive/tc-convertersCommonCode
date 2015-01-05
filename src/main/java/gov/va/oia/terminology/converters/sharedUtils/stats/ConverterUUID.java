@@ -156,9 +156,9 @@ public class ConverterUUID
 	/**
 	 * Write out a debug file with all of the UUID - String mappings
 	 */
-	public static void dump(File file) throws IOException
+	public static void dump(File outputDirectory, String prefix) throws IOException
 	{
-		BufferedWriter br = new BufferedWriter(new FileWriter(file));
+		BufferedWriter br = new BufferedWriter(new FileWriter(new File(outputDirectory, prefix + "DebugMap.txt")));
 		if (disableUUIDMap_)
 		{
 			ConsoleUtil.println("UUID Debug map was disabled");
