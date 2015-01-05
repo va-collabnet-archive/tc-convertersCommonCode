@@ -96,6 +96,9 @@ public class EConceptUtility
 	public final UUID workbenchAuxilary = TermAux.WB_AUX_PATH.getUuids()[0];
 	public final long defaultTime_;
 	
+	private UUID wbPropertyMetadataDescUUID = null;
+	private UUID wbPropertyMetadataRelUUID = null;
+	
 	private final String lang_ = "en";
 	private UUID terminologyPathUUID_ = workbenchAuxilary;  //start with this.
 
@@ -344,8 +347,6 @@ public class EConceptUtility
 	
 	/**
 	 * Add a description to the concept.  UUID for the description is calculated from the target concept, description value, type, and preferred flag.
-	 * 
-	 * @param time - if null, set to the time on the concept.
 	 */
 	public TkDescription addDescription(EConcept eConcept, String descriptionValue, DescriptionType wbDescriptionType, 
 			boolean preferred, UUID sourceDescriptionTypeUUID, UUID sourceDescriptionRefsetUUID, boolean retired)
@@ -356,8 +357,8 @@ public class EConceptUtility
 	/**
 	 * Add a description to the concept.
 	 * 
-	 * @param time - if null, set to the time on the concept.
 	 * @param descriptionPrimordialUUID - if not supplied, created from the concept UUID, the description value, the description type, and preferred flag
+	 * and the sourceDescriptionTypeUUID (if present)
 	 * @param sourceDescriptionTypeUUID - if null, set to "member"
 	 * @param sourceDescriptionRefsetUUID - if null, this and sourceDescriptionTypeUUID are ignored.
 	 */
@@ -376,7 +377,7 @@ public class EConceptUtility
 		if (descriptionPrimordialUUID == null)
 		{
 			descriptionPrimordialUUID = ConverterUUID.createNamespaceUUIDFromStrings(eConcept.getPrimordialUuid().toString(), descriptionValue, 
-					wbDescriptionType.name(), preferred + "");
+					wbDescriptionType.name(), preferred + "", (sourceDescriptionTypeUUID == null ? null : sourceDescriptionTypeUUID.toString()));
 		}
 		description.setPrimordialComponentUuid(descriptionPrimordialUUID);
 		UUID descriptionTypeUuid = null;
@@ -608,7 +609,7 @@ public class EConceptUtility
 		if (annotationPrimordialUuid == null)
 		{
 			annotationPrimordialUuid = ConverterUUID.createNamespaceUUIDFromStrings(component.getPrimordialComponentUuid().toString(), 
-					valueConcept.toString(), refsetUuid.toString());
+					(valueConcept == null ? refsetMemberTypeNormalMemberUuid_ : valueConcept).toString(), refsetUuid.toString());
 		}
 		conceptRefexMember.setPrimordialComponentUuid(annotationPrimordialUuid);
 		conceptRefexMember.setUuid1(valueConcept == null ? refsetMemberTypeNormalMemberUuid_ : valueConcept);
@@ -950,12 +951,22 @@ public class EConceptUtility
 			}
 			else if (pt instanceof BPT_Descriptions)
 			{
-				secondParent = setupWbPropertyMetadata("Description source type reference set", "Description name in source terminology", pt, dos);
+				//only do this once, in case we see a BPT_Descriptions more than once
+				if (wbPropertyMetadataDescUUID == null)
+				{
+					wbPropertyMetadataDescUUID = setupWbPropertyMetadata("Description source type reference set", "Description name in source terminology", pt, dos);
+					secondParent = wbPropertyMetadataDescUUID;
+				}
 			}
 			
 			else if (pt instanceof BPT_Relations)
 			{
-				secondParent = setupWbPropertyMetadata("Relation source type reference set", "Relation name in source terminology", pt, dos);
+				//only do this once, in case we see a BPT_Relations more than once
+				if (wbPropertyMetadataRelUUID == null)
+				{
+					wbPropertyMetadataRelUUID = setupWbPropertyMetadata("Relation source type reference set", "Relation name in source terminology", pt, dos);
+					secondParent = wbPropertyMetadataRelUUID;
+				}
 			}
 			
 			for (Property p : pt.getProperties())
