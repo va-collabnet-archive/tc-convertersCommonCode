@@ -739,7 +739,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid)
 	{
-		return addRelationship(eConcept, null, targetUuid, null, null, null, null);
+		return addRelationship(eConcept, null, targetUuid, null, null, null, null, null);
 	}
 
 	/**
@@ -751,7 +751,7 @@ public class EConceptUtility
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID targetUuid, UUID relTypeUuid, Long time)
 	{
-		return addRelationship(eConcept, null, targetUuid, relTypeUuid, null, null, time);
+		return addRelationship(eConcept, null, targetUuid, relTypeUuid, null, null, null, time);
 	}
 	
 	/**
@@ -762,11 +762,11 @@ public class EConceptUtility
 	{
 		if (p.getWBTypeUUID() == null)
 		{
-			return addRelationship(eConcept, null, targetUuid, p.getUUID(), null, null, time);
+			return addRelationship(eConcept, null, targetUuid, p.getUUID(), null, null, null,  time);
 		}
 		else
 		{
-			return addRelationship(eConcept, null, targetUuid, p.getWBTypeUUID(), p.getUUID(), p.getPropertyType().getPropertyTypeReferenceSetUUID(), time);
+			return addRelationship(eConcept, null, targetUuid, p.getWBTypeUUID(), p.getUUID(), p.getPropertyType().getPropertyTypeReferenceSetUUID(), null, time);
 		}
 	}
 	
@@ -775,10 +775,11 @@ public class EConceptUtility
 	 * 
 	 * @param relPrimordialUuid - optional - if not provided, created from the source, target and type.
 	 * @param relTypeUuid - is optional - if not provided, the default value of IS_A_REL is used.
+	 * @param group - is optional - if not provided, set to 0.
 	 * @param time - if null, default is used
 	 */
 	public TkRelationship addRelationship(EConcept eConcept, UUID relPrimordialUuid, UUID targetUuid, UUID relTypeUuid, 
-			UUID sourceRelTypeUUID, UUID sourceRelRefsetUUID, Long time)
+			UUID sourceRelTypeUUID, UUID sourceRelRefsetUUID, Integer group, Long time)
 	{
 		List<TkRelationship> relationships = eConcept.getRelationships();
 		if (relationships == null)
@@ -790,13 +791,14 @@ public class EConceptUtility
 		TkRelationship rel = new TkRelationship();
 		rel.setPrimordialComponentUuid(relPrimordialUuid != null ? relPrimordialUuid : 
 			ConverterUUID.createNamespaceUUIDFromStrings(eConcept.getPrimordialUuid().toString(), targetUuid.toString(), 
-					(relTypeUuid == null ? isARelUuid_.toString() : relTypeUuid.toString())));
+					(relTypeUuid == null ? isARelUuid_.toString() : relTypeUuid.toString()),
+					(group == null ? 0 + "" : group.toString())));
 		rel.setC1Uuid(eConcept.getPrimordialUuid());
 		rel.setTypeUuid(relTypeUuid == null ? isARelUuid_ : relTypeUuid);
 		rel.setC2Uuid(targetUuid);
 		rel.setCharacteristicUuid(definingCharacteristicUuid_);
 		rel.setRefinabilityUuid(notRefinableUuid);
-		rel.setRelGroup(0);
+		rel.setRelGroup(group == null ? 0 : group);
 		setRevisionAttributes(rel, null, time);
 
 		relationships.add(rel);
