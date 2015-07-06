@@ -2,7 +2,6 @@ package gov.va.oia.econgen;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.ihtsdo.tk.dto.concept.component.attribute.TkConceptAttributes;
 import org.ihtsdo.tk.dto.concept.component.attribute.TkConceptAttributesRevision;
@@ -18,10 +17,6 @@ public class EConceptAttrDiffUtility extends EConceptDiffUtility implements ECon
 		try {
 			// create component
 			if ((oldAttr != null) && (newAttr != null)) {
-				if (oldAttr.getPrimordialComponentUuid().equals(UUID.fromString("b1db7fac-b952-3e56-8a78-923d5835bdf4"))) {
-					int a = 2;
-				}
-				
 				TkConceptAttributesRevision rev = new TkConceptAttributesRevision();
 				boolean changeFound = false;
 

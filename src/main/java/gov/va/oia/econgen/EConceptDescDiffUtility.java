@@ -75,7 +75,14 @@ public class EConceptDescDiffUtility extends EConceptDiffUtility implements ECon
 			
 			if (!matchFound) {
 				conceptChangeFound = true;
+				List<TkRefexAbstractMember<?>> oldAnnots = new ArrayList<TkRefexAbstractMember<?>>();
+				
+				List<TkRefexAbstractMember<?>> refsets = handleRefsets(oldAnnots, newDesc.annotations);
+				if (refsets.size() > 0) {
+					newDesc.annotations = refsets;
+				}
 				diffDescs.add(newDesc);
+
 			}
 		}		
 		

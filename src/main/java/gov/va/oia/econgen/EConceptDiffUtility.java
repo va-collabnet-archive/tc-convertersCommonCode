@@ -1,17 +1,35 @@
 package gov.va.oia.econgen;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.ihtsdo.etypes.EConcept;
+import org.ihtsdo.tk.dto.concept.component.TkRevision;
+import org.ihtsdo.tk.dto.concept.component.attribute.TkConceptAttributesRevision;
+import org.ihtsdo.tk.dto.concept.component.description.TkDescription;
 import org.ihtsdo.tk.dto.concept.component.identifier.TkIdentifier;
 import org.ihtsdo.tk.dto.concept.component.refex.TkRefexAbstractMember;
+import org.ihtsdo.tk.dto.concept.component.refex.type_int.TkRefexIntMember;
+import org.ihtsdo.tk.dto.concept.component.refex.type_int.TkRefexIntRevision;
+import org.ihtsdo.tk.dto.concept.component.refex.type_member.TkRefexRevision;
+import org.ihtsdo.tk.dto.concept.component.refex.type_string.TkRefsetStrMember;
+import org.ihtsdo.tk.dto.concept.component.refex.type_string.TkRefsetStrRevision;
+import org.ihtsdo.tk.dto.concept.component.refex.type_uuid.TkRefexUuidMember;
+import org.ihtsdo.tk.dto.concept.component.refex.type_uuid.TkRefexUuidRevision;
+import org.ihtsdo.tk.dto.concept.component.refex.type_uuid_int.TkRefexUuidIntMember;
+import org.ihtsdo.tk.dto.concept.component.refex.type_uuid_int.TkRefexUuidIntRevision;
+import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 
-class EConceptDiffUtility extends EConceptChangeSetUtility {
+class EConceptDiffUtility  {
 	UUID inactiveStatus = UUID.fromString("a5daba09-7feb-37f0-8d6d-c3cadfc7f724");
-
+	static long importTime = (new Date()).getTime();
 	static boolean conceptChangeFound = false;
-	
+	static List<TkRefexAbstractMember<?>> emptyAnnotations = new ArrayList<TkRefexAbstractMember<?>>();
+
 	protected List<TkIdentifier> handleIds(List<TkIdentifier> oldIds, List<TkIdentifier> newIds) {
 		List<TkIdentifier> diffIds = new ArrayList<TkIdentifier>();
 		List<TkIdentifier> newIdsFound = new ArrayList<TkIdentifier>();
@@ -70,8 +88,6 @@ class EConceptDiffUtility extends EConceptChangeSetUtility {
 
 	}
 
-
-
 	
 	private void existingMembers(List<TkRefexAbstractMember<?>> oldRefsets,
 			List<TkRefexAbstractMember<?>> newRefsets,
@@ -83,8 +99,10 @@ class EConceptDiffUtility extends EConceptChangeSetUtility {
 					if ((newMember.getPrimordialComponentUuid().equals(oldMember.getPrimordialComponentUuid())) &&
 						(!newMember.equals(oldMember))) {
 						conceptChangeFound = true;
+						
 						TkRefexAbstractMember<?> diffRefset = newMember;
 						diffRefset.annotations = handleRefsets(oldMember.annotations, newMember.annotations);
+						diffRefsets.add(diffRefset);
 					}
 				}
 			}		
@@ -156,4 +174,124 @@ class EConceptDiffUtility extends EConceptChangeSetUtility {
 		return retiredList;
 	}
 
+	protected void retireRefsets(List<TkRefexAbstractMember<?>> refsets) {
+		if (refsets != null) {
+			for (TkRefexAbstractMember refset : refsets) {
+				TkRevision rev = null;
+
+				switch (refset.getType()) {
+					case MEMBER: 
+						rev = new TkRefexRevision();
+						break;
+					
+					case CID: 
+						rev = new TkRefexUuidRevision();
+						((TkRefexUuidRevision)rev).setUuid1(((TkRefexUuidMember)refset).getUuid1());
+						break;
+						
+					case STR: 
+						rev = new TkRefsetStrRevision();
+						((TkRefsetStrRevision)rev).setString1(((TkRefsetStrMember)refset).getString1());
+						break;
+						
+					case INT: 
+						rev = new TkRefexIntRevision();
+						((TkRefexIntRevision)rev).setInt1(((TkRefexIntMember)refset).getInt1());
+						break;
+						
+					case CID_INT: 
+						rev = new TkRefexUuidIntRevision();
+						((TkRefexUuidIntRevision)rev).setUuid1(((TkRefexUuidIntMember)refset).getUuid1());
+						((TkRefexUuidIntRevision)rev).setInt1(((TkRefexUuidIntMember)refset).getInt1());
+						break;
+						
+					default:
+						Logger.getLogger(EConceptDiffUtility.class.getName()).log(Level.SEVERE, "Have unhandled Refset Type for making revisions:" + refset.getType());
+						break;
+				}
+
+				
+				rev.statusUuid = inactiveStatus;
+				rev.time = importTime;
+				rev.authorUuid = refset.authorUuid;
+				rev.moduleUuid = refset.moduleUuid;
+				rev.pathUuid = refset.pathUuid;
+
+				if (refset.getRevisionList() == null) {
+					refset.revisions = new ArrayList<TkRefexAbstractMember>(); 
+				}
+		
+				refset.annotations = handleRefsets(refset.getAnnotations(), emptyAnnotations);
+
+				refset.getRevisionList().add(rev);
+				
+			}
+		}
+	}
+	
+	protected TkDescription retireDesc(TkDescription oldDesc) {
+		TkDescription retDesc = new TkDescription();
+		
+		retDesc.primordialUuid = oldDesc.primordialUuid;
+		retDesc.conceptUuid = oldDesc.conceptUuid;
+		retDesc.statusUuid = inactiveStatus;
+		retDesc.time = importTime;
+		retDesc.authorUuid = oldDesc.authorUuid;
+		retDesc.moduleUuid = oldDesc.moduleUuid;
+		retDesc.pathUuid = oldDesc.pathUuid;
+		retDesc.initialCaseSignificant = oldDesc.initialCaseSignificant;
+		retDesc.lang = oldDesc.lang;
+		retDesc.text = oldDesc.text;
+		retDesc.typeUuid = oldDesc.typeUuid;
+		
+		retireRefsets(retDesc.annotations);
+
+		return retDesc;
+	}
+
+	protected TkRelationship retireRel(TkRelationship oldRel) {
+		TkRelationship retRel = new TkRelationship();
+		
+		retRel.primordialUuid = oldRel.primordialUuid;
+		retRel.statusUuid = inactiveStatus;
+		retRel.time = importTime;
+		retRel.authorUuid = oldRel.authorUuid;
+		retRel.moduleUuid = oldRel.moduleUuid;
+		retRel.pathUuid = oldRel.pathUuid;
+		retRel.characteristicUuid = oldRel.characteristicUuid;
+		retRel.relGroup = oldRel.relGroup;
+		retRel.refinabilityUuid = oldRel.refinabilityUuid;
+		retRel.typeUuid = oldRel.typeUuid;
+		retRel.c1Uuid= oldRel.c1Uuid;
+		retRel.c2Uuid = oldRel.c2Uuid;
+		retRel.typeUuid = oldRel.typeUuid;
+		retRel.typeUuid = oldRel.typeUuid;
+		
+		retireRefsets(retRel.annotations);
+
+		return retRel;
+	}
+
+	public void retireCon(EConcept oldCon) {
+		oldCon.getConceptAttributes().revisions = new ArrayList<TkConceptAttributesRevision>();
+		TkConceptAttributesRevision attrRev = new TkConceptAttributesRevision();
+
+		attrRev.statusUuid = inactiveStatus;
+		attrRev.time = importTime;
+		attrRev.authorUuid = oldCon.conceptAttributes.authorUuid;
+		attrRev.moduleUuid = oldCon.conceptAttributes.moduleUuid;
+		attrRev.pathUuid = oldCon.conceptAttributes.pathUuid;
+		
+		oldCon.getConceptAttributes().revisions.add(attrRev);
+		
+		retireRefsets(oldCon.getConceptAttributes().annotations);
+		
+		for (TkDescription desc : oldCon.getDescriptions()) {
+			retireDesc(desc);
+		}
+			
+		for (TkRelationship desc : oldCon.getRelationships()) {
+			retireRel(desc);
+		}
+	}
 }

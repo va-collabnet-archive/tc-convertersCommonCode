@@ -3,7 +3,6 @@ package gov.va.oia.econgen;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import org.ihtsdo.tk.dto.concept.component.identifier.TkIdentifier;
 import org.ihtsdo.tk.dto.concept.component.refex.TkRefexAbstractMember;
@@ -11,8 +10,6 @@ import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationshipRevision;
 
 public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConceptDiffI{
-//	private final UUID  INFERRED_RELATIONSHIP = UUID.fromString("1290e6ba-48d0-31d2-8d62-e133373c63f5");
-
 	public Object diff(Object oldComps, Object newComps) {
 		try {
 			if ((oldComps != null) && (newComps != null)) {
@@ -77,6 +74,13 @@ public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConc
 			
 			if (!matchFound) {
 				diffRels.add(newRel);
+				List<TkRefexAbstractMember<?>> oldAnnots = new ArrayList<TkRefexAbstractMember<?>>();
+				
+				List<TkRefexAbstractMember<?>> refsets = handleRefsets(oldAnnots, newRel.annotations);
+				if (refsets.size() > 0) {
+					newRel.annotations = refsets;
+				}
+
 				conceptChangeFound = true;
 			}
 		}		

@@ -26,6 +26,9 @@ import java.util.UUID;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.ihtsdo.etypes.EConcept;
+import org.ihtsdo.tk.dto.concept.component.attribute.TkConceptAttributes;
+import org.ihtsdo.tk.dto.concept.component.description.TkDescription;
+import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 
 /**
  * Goal which loads an EConcept.jbin file into a bdb.
@@ -63,10 +66,12 @@ public class DiffEConMojo extends AbstractMojo {
     private static final int CHANGE = 2;
     private static final int RETIRE = 1;
     private static final int NEW = 0;
-    private static final String DIR_TYPE = "ALL";
-//    private static final int CHANGECOUNT = 25;
-    private static final Set<UUID> testCons = new HashSet<UUID>();
 
+    private static EConceptAttrDiffUtility attrUtil = new EConceptAttrDiffUtility();
+    private static EConceptDescDiffUtility descUtil = new EConceptDescDiffUtility();
+    private static EConceptRelDiffUtility relUtil = new EConceptRelDiffUtility();
+    private static EConceptRelDiffUtility util = new EConceptRelDiffUtility();
+	
     DateFormat dateFormat = new SimpleDateFormat("MM-dd HH-mm-ss");
 	private FileOutputStream csFile;
 
@@ -74,22 +79,6 @@ public class DiffEConMojo extends AbstractMojo {
 	private Date date;
     
     public void execute() throws MojoExecutionException {
-    	// QUESTION: Retire time, not MyTime but Vesion, no?
-
-    	
-    	/*testCons.add(UUID.fromString("a0e27ae9-8438-31b2-9172-540f742fe13c")); // G New Desc on "Moderate (severity modifier) = moderately" 
-    	testCons.add(UUID.fromString("54998f38-c876-37ff-89fb-9820cbad513f")); // G x Retire Desc "Visual impairment of both eyes" (two UUIDs)
-    	
-    	testCons.add(UUID.fromString("a25d0914-3dfc-3a11-bd61-03f3b604cf08")); // RETIRED STATED & INFERRED, (not just one )x Retire Rel "Keratometry Steep Power ***is*** Corneal curvature refracting power
-
-    	testCons.add(UUID.fromString("b1db7fac-b952-3e56-8a78-923d5835bdf4")); // RETIRED COn & RELS, (what about NEW ISA) x Retiure Con "Secondary anemia (disorder)"
-    	testCons.add(UUID.fromString("55e18a6d-14a6-3154-8cad-6a6098dc7fec")); // x (null) newConcept: Patient declines smoking cessation information (situation)
-
-    	
-    	
-    	
-    	testCons.add(UUID.fromString("0bc72bfd-5fbf-40c8-9c8f-f70454b298c3")); // New Rel on "Inadequate dietary intake of pantothenic acid ***is*** Inadequate pantothenic acid intake (finding)"
-*/    	
         try {
         	setupOutput();
 
@@ -121,9 +110,7 @@ public class DiffEConMojo extends AbstractMojo {
         try {
             while (true) {
                 EConcept eConcept = new EConcept(jbinReader);
-            	if (testCons.isEmpty() || testCons.contains(eConcept.getPrimordialUuid())) {
-            		inputList.add(eConcept);
-            	}
+        		inputList.add(eConcept);
             }
         } catch (EOFException e) {
         	jbinFile.close();
@@ -134,8 +121,7 @@ public class DiffEConMojo extends AbstractMojo {
 
 	private void setupOutput() throws IOException {
         date = new Date();
-//        String parentFolder = new String(DIR + "\\Analysis\\" + "\\" + dateFormat.format(date) + " - "+ DIR_TYPE + "-" + CHANGECOUNT + "\\");
-        String parentFolder = new String(DIR + "\\Analysis\\" + "\\" + dateFormat.format(date) + " - "+ DIR_TYPE +  "\\");
+        String parentFolder = new String(DIR + "\\Analysis\\" + "\\" + dateFormat.format(date) + "-ALL\\");
         File f = new File(parentFolder);
         f.mkdirs();
                     
@@ -152,27 +138,20 @@ public class DiffEConMojo extends AbstractMojo {
 		String type = null;
 		
 		for (Integer key : changesetList.keySet()) {
-			if (key == CHANGE) {
-				type = "Changed ";
-				diffWriter.write("\t\t\t**** CHANGED CONCEPTS ****");
-			} else if (key == RETIRE) {
-				type = "Retired ";
-				diffWriter.write("\n\n\n\n\t\t\t**** RETIRED CONCEPTS ****");
-			} else {
-				type = "New ";
-				diffWriter.write("\n\n\n\n\t\t\t**** NEW CONCEPTS ****");
-			}
-			
 			i = 1;
-			int count = 0;
-			Long timestamp = new Long(System.currentTimeMillis());
 			List<EConcept> list = changesetList.get(key);
+
+			if (key == CHANGE) {
+				type = "CHANGED ";
+			} else if (key == RETIRE) {
+				type = "RETIRED ";
+			} else {
+				type = "NEW ";
+			}
+			diffWriter.write("\t\t\t**** " + type + " CONCEPTS ****");
+
 			for (EConcept c : list) {
 				try {
-//					if (!c.getPrimordialUuid().equals(UUID.fromString("80521df5-239d-3a1f-b751-1bf8d71a671e"))) {
-//						continue;
-//					}
-				
 					diffWriter.write("\n\n\t\t\t---- " + type + "Concept #" + i++ + "   " + c.getPrimordialUuid() + " ----");
 					diffWriter.write(c.toString());
 
@@ -224,17 +203,11 @@ public class DiffEConMojo extends AbstractMojo {
     	changesetList.put(NEW, newSet3);
     	changesetList.put(CHANGE, newSet);
 
-    	int count = 0;
     	// Find existing
-   	for (EConcept oldCon : oldList) {
-//    		if (!oldCon.getPrimordialUuid().equals(UUID.fromString("dc1f1e05-f107-3039-98ae-fa25e4a93868"))) {
-//    			continue;
-//    		}
+	   	for (EConcept oldCon : oldList) {
     		for (EConcept newCon : newList) {
     			if (oldCon.getPrimordialUuid().equals(newCon.getPrimordialUuid())) {
-    				count++;
-    		    	EConcept diffCon = EConDiffer.diff(oldCon, newCon);
-//    		    	if (count < CHANGECOUNT && diffCon != null) {
+    		    	EConcept diffCon = diff(oldCon, newCon);
     		    	if (diffCon != null) {
 	    		    	changesetList.get(CHANGE).add(diffCon); 
     		    	}
@@ -244,26 +217,57 @@ public class DiffEConMojo extends AbstractMojo {
     		}
     	}
 
-
-	
-	    	// Retire oldCons not in oldList
-	    	// Note: SNOMED CT should handle this itself... so really just for other terms
-	    	EConRetirer retireUtil = new EConRetirer();
-	    	
-	    	for (EConcept oldCon : oldList) {
-	    		if (!matchedSet.contains(oldCon.getPrimordialUuid())) {
-	    			retireUtil.retireCon(oldCon);
-			    	changesetList.get(RETIRE).add(oldCon);
-	    		}
-	    	}
-	    	
-	    	// Add newCons not in newList
-	    	for (EConcept newCon : newList) {
-	    		if (!matchedSet.contains(newCon.getPrimordialUuid())) {
-			    	changesetList.get(NEW).add(newCon);
-	    		}
-	    	}
+    	// Retire oldCons not in oldList
+    	// Note: SNOMED CT should handle this itself... so really just for other terms
+		EConceptDiffUtility retireUtil = new EConceptDiffUtility();
+		
+    	for (EConcept oldCon : oldList) {
+    		if (!matchedSet.contains(oldCon.getPrimordialUuid())) {
+    			retireUtil.retireCon(oldCon);
+		    	changesetList.get(RETIRE).add(oldCon);
+    		}
+    	}
+    	
+    	// Add newCons not in newList
+    	for (EConcept newCon : newList) {
+    		if (!matchedSet.contains(newCon.getPrimordialUuid())) {
+		    	changesetList.get(NEW).add(newCon);
+    		}
+    	}
     
 		return changesetList;
+	}
+
+	private static EConcept diff(EConcept oldCon, EConcept newCon) {
+		EConcept diffCon = new EConcept();
+		
+		if (oldCon.getPrimordialUuid().equals(newCon.getPrimordialUuid())) {
+			if (oldCon.getPrimordialUuid().equals(UUID.fromString("80521df5-239d-3a1f-b751-1bf8d71a671e"))) {
+				int a = 3;
+			}
+			EConceptDiffUtility.conceptChangeFound = false;
+			
+			diffCon.setPrimordialUuid(oldCon.getPrimordialUuid());
+
+			if (oldCon.annotationIndexStyleRefex != newCon.annotationIndexStyleRefex) {
+				diffCon.annotationIndexStyleRefex = newCon.annotationIndexStyleRefex;
+				EConceptDiffUtility.conceptChangeFound = true;
+			}
+			
+			if (oldCon.annotationStyleRefex != newCon.annotationStyleRefex) {
+				diffCon.annotationStyleRefex = newCon.annotationStyleRefex;
+				EConceptDiffUtility.conceptChangeFound = true;
+			}
+		
+			diffCon.conceptAttributes = (TkConceptAttributes)attrUtil.diff(oldCon.conceptAttributes, newCon.conceptAttributes);
+			diffCon.descriptions = (List<TkDescription>)descUtil.diff(oldCon.descriptions, newCon.descriptions);
+			diffCon.relationships = (List<TkRelationship>)relUtil.diff(oldCon.relationships, newCon.relationships);
+			diffCon.refsetMembers = util.handleRefsets(oldCon.refsetMembers, newCon.refsetMembers);
+		}
+		
+		if (EConceptDiffUtility.conceptChangeFound == false) {
+			return null;
+		}
+		return diffCon;
 	}
 }
