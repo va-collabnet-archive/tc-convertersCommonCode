@@ -55,7 +55,7 @@ class EConceptDiffUtility  {
 					if (!matchFound) {
 						newIdsFound.add(oldId);
 						conceptChangeFound = true;
-					}
+					}	
 				}
 				
 				diffIds.addAll(newIdsFound);
@@ -64,6 +64,7 @@ class EConceptDiffUtility  {
 		
 		return diffIds;
 	}
+
 
 
 	List<TkRefexAbstractMember<?>>  handleRefsets(List<TkRefexAbstractMember<?>> oldRefsets, List<TkRefexAbstractMember<?>> newRefsets) {
@@ -117,11 +118,11 @@ class EConceptDiffUtility  {
 			if (oldRefsets == null) {
 				diffRefsets.addAll(newRefsets);
 			} else {
-				for (TkRefexAbstractMember<?> newComp : newRefsets) {
+				for (TkRefexAbstractMember<?> newMember : newRefsets) {
 					
 					boolean matchFound = false;
-					for (TkRefexAbstractMember<?> oldComp : oldRefsets) {
-						if (!newComp.getPrimordialComponentUuid().equals(oldComp.getPrimordialComponentUuid())) {
+					for (TkRefexAbstractMember<?> oldMember : oldRefsets) {
+						if (newMember.getPrimordialComponentUuid().equals(oldMember.getPrimordialComponentUuid())) {
 							matchFound = true;
 							break;
 						}
@@ -129,7 +130,7 @@ class EConceptDiffUtility  {
 					
 					if (!matchFound) {
 						conceptChangeFound = true;
-						diffRefsets.add(newComp);
+						diffRefsets.add(newMember);
 					}
 				}		
 			}
@@ -152,12 +153,12 @@ class EConceptDiffUtility  {
 		boolean matchFound = false;
 		
 		if (oldCompList != null) {
-			for (TkRefexAbstractMember<?> oldComp : oldCompList) {
+			for (TkRefexAbstractMember<?> oldMember : oldCompList) {
 				if (newCompList == null) {
 					retiredList.addAll(oldCompList);
 				} else {
-					for (TkRefexAbstractMember<?> newComp : newCompList) {
-						if (oldComp.getPrimordialComponentUuid().equals(newComp.getPrimordialComponentUuid())) {
+					for (TkRefexAbstractMember<?> newMember : newCompList) {
+						if (oldMember.getPrimordialComponentUuid().equals(newMember.getPrimordialComponentUuid())) {
 							matchFound = true;
 							break;
 						}
@@ -165,7 +166,7 @@ class EConceptDiffUtility  {
 		
 					if (!matchFound) {
 						conceptChangeFound = true;
-						retiredList.add(oldComp);
+						retiredList.add(oldMember);
 					}
 				}
 			}
