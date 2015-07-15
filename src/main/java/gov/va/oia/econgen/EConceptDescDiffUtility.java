@@ -82,7 +82,7 @@ public class EConceptDescDiffUtility extends EConceptDiffUtility implements ECon
 				List<TkRefexAbstractMember<?>> oldAnnots = new ArrayList<TkRefexAbstractMember<?>>();
 				
 				List<TkRefexAbstractMember<?>> refsets = handleRefsets(oldAnnots, newDesc.annotations);
-				if (refsets.size() > 0) {
+				if (refsets != null && refsets.size() > 0) {
 					newDesc.annotations = refsets;
 				}
 				diffDescs.add(newDesc);

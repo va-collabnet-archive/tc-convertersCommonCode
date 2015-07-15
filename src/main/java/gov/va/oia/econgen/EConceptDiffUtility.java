@@ -75,33 +75,36 @@ class EConceptDiffUtility  {
 		try {
 			List<TkRefexAbstractMember<?>> diffRefsets = new ArrayList<TkRefexAbstractMember<?>>();
 	
- 			Iterator<TkRefexAbstractMember<?>> itr = newRefsets.iterator();
- 
-		
-			while (itr.hasNext()) {
-				TkRefexAbstractMember<?> member = itr.next();
+			if(newRefsets != null) {
+	 			Iterator<TkRefexAbstractMember<?>> itr = newRefsets.iterator();
+	 
+			
+				while (itr.hasNext()) {
+					TkRefexAbstractMember<?> member = itr.next();
+					
+					// Language Refset
+					if (!member.getRefexUuid().equals(UUID.fromString("a02c685c-df26-5c8e-8c45-4c64ac589f62"))) {
+						oldLangRefexSet.add(member);
+						itr.remove();
+					}
+				}
+			}
+			
+			if(oldRefsets != null) {
+				Iterator<TkRefexAbstractMember<?>> itr = oldRefsets.iterator();
 				
-				// Language Refset
-				if (!member.getRefexUuid().equals(UUID.fromString("a02c685c-df26-5c8e-8c45-4c64ac589f62"))) {
-					oldLangRefexSet.add(member);
-					itr.remove();
+				while (itr.hasNext()) {
+					TkRefexAbstractMember<?> member = itr.next();
+	
+					// Language Refset
+					if (!itr.next().getRefexUuid().equals(UUID.fromString("a02c685c-df26-5c8e-8c45-4c64ac589f62"))) {
+						newLangRefexSet.add(member);
+	
+						itr.remove();
+					}
 				}
-			}
-			
-			itr = oldRefsets.iterator();
-			
-			while (itr.hasNext()) {
-				TkRefexAbstractMember<?> member = itr.next();
-
-				// Language Refset
-				if (!itr.next().getRefexUuid().equals(UUID.fromString("a02c685c-df26-5c8e-8c45-4c64ac589f62"))) {
-					newLangRefexSet.add(member);
-
-					itr.remove();
-				}
-			}
-			
-		// Handle Retired Refsets (don't need to retire the annots' annots I think)
+			}			
+			// Handle Retired Refsets (don't need to retire the annots' annots I think)
 			retireRefsets(oldRefsets, newRefsets, diffRefsets);
 			
 			// Handle New Refsets (don't need to do more than add I think)

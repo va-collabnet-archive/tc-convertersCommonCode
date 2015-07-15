@@ -82,7 +82,7 @@ public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConc
 				List<TkRefexAbstractMember<?>> oldAnnots = new ArrayList<TkRefexAbstractMember<?>>();
 				
 				List<TkRefexAbstractMember<?>> refsets = handleRefsets(oldAnnots, newRel.annotations);
-				if (refsets == null || refsets.size() > 0) {
+				if (refsets != null && refsets.size() > 0) {
 					newRel.annotations = refsets;
 				}
 

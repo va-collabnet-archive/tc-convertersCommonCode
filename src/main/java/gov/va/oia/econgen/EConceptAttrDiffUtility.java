@@ -55,7 +55,7 @@ public class EConceptAttrDiffUtility extends EConceptDiffUtility implements ECon
 					}
 					
 					List<TkRefexAbstractMember<?>> refsets = handleRefsets(oldAttr.annotations, newAttr.annotations);
-					if (refsets.size() > 0) {
+					if (refsets != null && refsets.size() > 0) {
 						oldAttr.annotations = refsets;
 					}
 	
