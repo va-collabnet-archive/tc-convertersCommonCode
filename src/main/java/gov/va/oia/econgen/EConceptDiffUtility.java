@@ -2,6 +2,7 @@ package gov.va.oia.econgen;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -26,6 +27,9 @@ import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 
 class EConceptDiffUtility  {
 	UUID inactiveStatus = UUID.fromString("a5daba09-7feb-37f0-8d6d-c3cadfc7f724");
+	private List<TkRefexAbstractMember<?>> oldLangRefexSet = new ArrayList<TkRefexAbstractMember<?>>();
+	private List<TkRefexAbstractMember<?>> newLangRefexSet = new ArrayList<TkRefexAbstractMember<?>>();
+	
 	static long importTime = (new Date()).getTime();
 	static boolean conceptChangeFound = false;
 	static List<TkRefexAbstractMember<?>> emptyAnnotations = new ArrayList<TkRefexAbstractMember<?>>();
@@ -71,7 +75,33 @@ class EConceptDiffUtility  {
 		try {
 			List<TkRefexAbstractMember<?>> diffRefsets = new ArrayList<TkRefexAbstractMember<?>>();
 	
-			// Handle Retired Refsets (don't need to retire the annots' annots I think)
+ 			Iterator<TkRefexAbstractMember<?>> itr = newRefsets.iterator();
+ 
+		
+			while (itr.hasNext()) {
+				TkRefexAbstractMember<?> member = itr.next();
+				
+				// Language Refset
+				if (!member.getRefexUuid().equals(UUID.fromString("a02c685c-df26-5c8e-8c45-4c64ac589f62"))) {
+					oldLangRefexSet.add(member);
+					itr.remove();
+				}
+			}
+			
+			itr = oldRefsets.iterator();
+			
+			while (itr.hasNext()) {
+				TkRefexAbstractMember<?> member = itr.next();
+
+				// Language Refset
+				if (!itr.next().getRefexUuid().equals(UUID.fromString("a02c685c-df26-5c8e-8c45-4c64ac589f62"))) {
+					newLangRefexSet.add(member);
+
+					itr.remove();
+				}
+			}
+			
+		// Handle Retired Refsets (don't need to retire the annots' annots I think)
 			retireRefsets(oldRefsets, newRefsets, diffRefsets);
 			
 			// Handle New Refsets (don't need to do more than add I think)
@@ -101,7 +131,7 @@ class EConceptDiffUtility  {
 						(!newMember.equals(oldMember))) {
 						conceptChangeFound = true;
 						
-						TkRefexAbstractMember<?> diffRefset = newMember;
+						TkRefexAbstractMember<?> diffRefset = diffMember(oldMember, newMember);
 						diffRefset.annotations = handleRefsets(oldMember.annotations, newMember.annotations);
 						diffRefsets.add(diffRefset);
 					}
@@ -110,6 +140,66 @@ class EConceptDiffUtility  {
 		}
 	}
 	
+	private TkRefexAbstractMember diffMember(
+			TkRefexAbstractMember oldMember,
+			TkRefexAbstractMember newMember)
+	{
+		TkRevision rev = null;
+
+		try {
+			switch (newMember.getType()) {
+				case MEMBER: 
+					rev = new TkRefexRevision();
+					break;
+				
+				case CID: 
+					rev = new TkRefexUuidRevision();
+					((TkRefexUuidRevision)rev).setUuid1(((TkRefexUuidMember)newMember).getUuid1());
+					break;
+					
+				case STR: 
+					rev = new TkRefsetStrRevision();
+					((TkRefsetStrRevision)rev).setString1(((TkRefsetStrMember)newMember).getString1());
+					break;
+					
+				case INT: 
+					rev = new TkRefexIntRevision();
+					((TkRefexIntRevision)rev).setInt1(((TkRefexIntMember)newMember).getInt1());
+					break;
+					
+				case CID_INT: 
+					rev = new TkRefexUuidIntRevision();
+					((TkRefexUuidIntRevision)rev).setUuid1(((TkRefexUuidIntMember)newMember).getUuid1());
+					((TkRefexUuidIntRevision)rev).setInt1(((TkRefexUuidIntMember)newMember).getInt1());
+					break;
+					
+				default:
+					String errStr = "Have unhandled Refset Type for making revisions:" + newMember.getType();
+					Logger.getLogger(EConceptDiffUtility.class.getName()).log(Level.SEVERE, errStr);
+					throw new Exception(errStr);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		rev.statusUuid = newMember.statusUuid;
+		rev.time = newMember.time;
+		rev.authorUuid = newMember.authorUuid;
+		rev.moduleUuid = newMember.moduleUuid;
+		rev.pathUuid = newMember.pathUuid;
+
+		if (oldMember.getRevisionList() == null) {
+			oldMember.revisions = new ArrayList<TkRefexAbstractMember>(); 
+		}
+
+		oldMember.annotations = handleRefsets(oldMember.getAnnotations(), newMember.getAnnotations());
+
+		oldMember.getRevisionList().add(rev);
+			
+
+		return oldMember;
+	}
+
 	private void newMembers(List<TkRefexAbstractMember<?>> oldRefsets,
 			List<TkRefexAbstractMember<?>> newRefsets,
 			List<TkRefexAbstractMember<?>> diffRefsets) {
@@ -180,37 +270,42 @@ class EConceptDiffUtility  {
 			for (TkRefexAbstractMember refset : refsets) {
 				TkRevision rev = null;
 
-				switch (refset.getType()) {
-					case MEMBER: 
-						rev = new TkRefexRevision();
-						break;
-					
-					case CID: 
-						rev = new TkRefexUuidRevision();
-						((TkRefexUuidRevision)rev).setUuid1(((TkRefexUuidMember)refset).getUuid1());
-						break;
+				try {
+					switch (refset.getType()) {
+						case MEMBER: 
+							rev = new TkRefexRevision();
+							break;
 						
-					case STR: 
-						rev = new TkRefsetStrRevision();
-						((TkRefsetStrRevision)rev).setString1(((TkRefsetStrMember)refset).getString1());
-						break;
-						
-					case INT: 
-						rev = new TkRefexIntRevision();
-						((TkRefexIntRevision)rev).setInt1(((TkRefexIntMember)refset).getInt1());
-						break;
-						
-					case CID_INT: 
-						rev = new TkRefexUuidIntRevision();
-						((TkRefexUuidIntRevision)rev).setUuid1(((TkRefexUuidIntMember)refset).getUuid1());
-						((TkRefexUuidIntRevision)rev).setInt1(((TkRefexUuidIntMember)refset).getInt1());
-						break;
-						
-					default:
-						Logger.getLogger(EConceptDiffUtility.class.getName()).log(Level.SEVERE, "Have unhandled Refset Type for making revisions:" + refset.getType());
-						break;
+						case CID: 
+							rev = new TkRefexUuidRevision();
+							((TkRefexUuidRevision)rev).setUuid1(((TkRefexUuidMember)refset).getUuid1());
+							break;
+							
+						case STR: 
+							rev = new TkRefsetStrRevision();
+							((TkRefsetStrRevision)rev).setString1(((TkRefsetStrMember)refset).getString1());
+							break;
+							
+						case INT: 
+							rev = new TkRefexIntRevision();
+							((TkRefexIntRevision)rev).setInt1(((TkRefexIntMember)refset).getInt1());
+							break;
+							
+						case CID_INT: 
+							rev = new TkRefexUuidIntRevision();
+							((TkRefexUuidIntRevision)rev).setUuid1(((TkRefexUuidIntMember)refset).getUuid1());
+							((TkRefexUuidIntRevision)rev).setInt1(((TkRefexUuidIntMember)refset).getInt1());
+							break;
+							
+						default:
+							String errStr = "Have unhandled Refset Type for making revisions:" + refset.getType();
+							Logger.getLogger(EConceptDiffUtility.class.getName()).log(Level.SEVERE, errStr);
+							throw new Exception(errStr);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-
+				
 				
 				rev.statusUuid = inactiveStatus;
 				rev.time = importTime;
@@ -294,5 +389,12 @@ class EConceptDiffUtility  {
 		for (TkRelationship desc : oldCon.getRelationships()) {
 			retireRel(desc);
 		}
+	}
+	
+	public List<TkRefexAbstractMember<?>> getOldLangRefexSet() {
+		return oldLangRefexSet;
+	}
+	public List<TkRefexAbstractMember<?>> getNewLangRefexSet() {
+		return newLangRefexSet;
 	}
 }

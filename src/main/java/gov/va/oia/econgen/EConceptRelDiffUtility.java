@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.ihtsdo.tk.dto.concept.component.description.TkDescription;
 import org.ihtsdo.tk.dto.concept.component.identifier.TkIdentifier;
 import org.ihtsdo.tk.dto.concept.component.refex.TkRefexAbstractMember;
 import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
@@ -12,7 +13,11 @@ import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationshipRevision;
 public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConceptDiffI{
 	public Object diff(Object oldComps, Object newComps) {
 		try {
-			if ((oldComps != null) && (newComps != null)) {
+			if (newComps != null) {
+				if (oldComps == null) {
+					oldComps = new ArrayList<TkRelationship>();
+				}
+
 				List<TkRelationship> oldRels = (List<TkRelationship>)oldComps;
 				List<TkRelationship> newRels = (List<TkRelationship>)newComps;
 				
@@ -77,7 +82,7 @@ public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConc
 				List<TkRefexAbstractMember<?>> oldAnnots = new ArrayList<TkRefexAbstractMember<?>>();
 				
 				List<TkRefexAbstractMember<?>> refsets = handleRefsets(oldAnnots, newRel.annotations);
-				if (refsets.size() > 0) {
+				if (refsets == null || refsets.size() > 0) {
 					newRel.annotations = refsets;
 				}
 

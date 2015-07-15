@@ -13,7 +13,11 @@ import org.ihtsdo.tk.dto.concept.component.refex.TkRefexAbstractMember;
 public class EConceptDescDiffUtility extends EConceptDiffUtility implements EConceptDiffI {
 	public Object diff(Object oldComps, Object newComps) {
 		try {
-			if ((oldComps != null) && (newComps != null)) {
+			if (newComps != null) {
+				if (oldComps == null) {
+					oldComps = new ArrayList<TkDescription>();
+				}
+
 				List<TkDescription> oldDescs = (List<TkDescription>)oldComps;
 				List<TkDescription> newDescs = (List<TkDescription>)newComps;
 				
