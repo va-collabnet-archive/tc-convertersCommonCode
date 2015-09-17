@@ -54,7 +54,7 @@ public class EConceptDescDiffUtility extends EConceptDiffUtility implements ECon
 			}
 
 			if (!matchFound) {
-				TkDescription retDesc = retireDesc(oldDesc);
+				TkDescription retDesc = retireDesc(oldDesc, newImportDate);
 				retiredList.add(retDesc);
 				conceptChangeFound = true;
 			}
@@ -117,7 +117,7 @@ public class EConceptDescDiffUtility extends EConceptDiffUtility implements ECon
 					{
 						if (!oldDesc.getStatusUuid().equals(newDesc.getStatusUuid()) && 
 							 newDesc.getStatusUuid().equals(inactiveStatus)) {
-							TkDescription retDesc = retireDesc(oldDesc);
+							TkDescription retDesc = retireDesc(oldDesc, newDesc.time);
 							diffDescs.add(retDesc);
 							conceptChangeFound = true;
 						} else {

@@ -70,11 +70,16 @@ public class DiffEConMojo extends AbstractMojo {
 	 * @parameter
 	 * @required
 	 */
-	private File sCTCoreJBin;
+	private File sctCoreJBin;
+	/**
+	 *
+	 * @parameter
+	 * @required
+	 */
+	private String outputDirPath;
 
 
 	
-	private static final String DIR = "C:\\Users\\jefron\\Desktop\\DiffECon\\";
 	private static final String conceptFILENAME = "conceptList.txt";
 	private static final String diffFILENAME = "changedConcepts.txt";
 	private static final String missingRefsetComponentFILENAME = "missingRefsetComponent.txt";
@@ -106,6 +111,14 @@ public class DiffEConMojo extends AbstractMojo {
 	private List<EConcept> previousEConceptList;
 	private List<EConcept> currentEConceptList;
 	private Date date;
+
+
+	private final int IMPORT_YEAR = 2015;
+	private final int IMPORT_MONTH = 9;
+	private final int IMPORT_DATE = 31;
+
+
+	private EConceptDiffUtility retireUtil;
     
     public void execute() throws MojoExecutionException {
     	setup();
@@ -131,9 +144,9 @@ public class DiffEConMojo extends AbstractMojo {
     }
 
 	private void trimRefsetList() throws IOException {
-		if (sCTCoreJBin != null) {
+		if (sctCoreJBin != null) {
 			try {
-				List<EConcept> sctCoreList = readJBin(sCTCoreJBin);
+				List<EConcept> sctCoreList = readJBin(sctCoreJBin);
 				
 				for (EConcept c : sctCoreList) {
 					updateSeenComponentList(c, c);
@@ -228,15 +241,14 @@ public class DiffEConMojo extends AbstractMojo {
         try {
         	setupOutputFiles();
 	    	
-	//    	OldEConceptMaker oldMaker = new OldEConceptMaker();
-	//    	NewEConceptMaker newMaker = new NewEConceptMaker();
-	//    	List<EConcept> oldList = oldMaker.createNewEConceptList();
-	//    	List<EConcept> newList = newMaker.createNewEConceptList();
-	    	
 	    	previousEConceptList = readJBin(oldJBin);
 	    	currentEConceptList = readJBin(newJBin);
 	    	
 	    	writeMakers(previousEConceptList, currentEConceptList);
+	    	
+			retireUtil = new EConceptDiffUtility();
+			retireUtil.setNewImportDate(IMPORT_YEAR, IMPORT_MONTH, IMPORT_DATE);
+
         } catch (IOException | ClassNotFoundException e) {
         	e.printStackTrace();
         }
@@ -244,18 +256,17 @@ public class DiffEConMojo extends AbstractMojo {
 
 	private void setupOutputFiles() throws IOException {
         date = new Date();
-        String parentFolder = new String(DIR + "\\Analysis\\" + "\\" + dateFormat.format(date) + "-ALL\\");
-        File f = new File(parentFolder);
+        File f = new File(outputDirPath);
         f.mkdirs();
                     
-    	conceptWriter = new FileWriter(parentFolder + conceptFILENAME);
-    	diffWriter = new FileWriter(parentFolder + diffFILENAME);		
-    	missingRefsetComponentWriter = new FileWriter(parentFolder + missingRefsetComponentFILENAME);		
+    	conceptWriter = new FileWriter(outputDirPath + conceptFILENAME);
+    	diffWriter = new FileWriter(outputDirPath + diffFILENAME);		
+    	missingRefsetComponentWriter = new FileWriter(outputDirPath + missingRefsetComponentFILENAME);		
     	
-    	FileOutputStream componentCSFile = new FileOutputStream(new File(parentFolder + componentFILENAME + "-" + dateFormat.format(date) + ".eccs"));
+    	FileOutputStream componentCSFile = new FileOutputStream(new File(outputDirPath + componentFILENAME + ".eccs"));
     	componentCSWriter = new DataOutputStream(new BufferedOutputStream(componentCSFile));
        
-        FileOutputStream refsetCSFile = new FileOutputStream(new File(parentFolder + refsetFILENAME + "-" + dateFormat.format(date) + ".eccs"));
+        FileOutputStream refsetCSFile = new FileOutputStream(new File(outputDirPath + refsetFILENAME + "-" + ".eccs"));
     	refsetCSWriter = new DataOutputStream(new BufferedOutputStream(refsetCSFile));
                 
 	}
@@ -355,11 +366,10 @@ public class DiffEConMojo extends AbstractMojo {
 
     	// Retire oldCons not in oldList
     	// Note: SNOMED CT should handle this itself... so really just for other terms
-		EConceptDiffUtility retireUtil = new EConceptDiffUtility();
 		
     	for (EConcept oldCon : oldList) {
     		if (!matchedSet.contains(oldCon.getPrimordialUuid())) {
-    			retireUtil.retireCon(oldCon);
+    			retireUtil.retireCon(oldCon, retireUtil.getNewImportDate());
     			retiredConcepts.add(oldCon);
     		}
     	}

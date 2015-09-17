@@ -55,7 +55,7 @@ public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConc
 			}
 
 			if (!matchFound) {
-				TkRelationship retRel = retireRel(oldRel);
+				TkRelationship retRel = retireRel(oldRel, newImportDate);
 				retiredList.add(retRel);
 				conceptChangeFound = true;
 			}
@@ -114,7 +114,7 @@ public class EConceptRelDiffUtility extends EConceptDiffUtility implements EConc
 		    		{
 						if (!oldRel.getStatusUuid().equals(newRel.getStatusUuid()) &&
 							 newRel.getStatusUuid().equals(inactiveStatus)) {
-							TkRelationship retRel = retireRel(oldRel);
+							TkRelationship retRel = retireRel(oldRel, newRel.time);
 							conceptChangeFound = true;
 							diffRels.add(retRel);
 						} else {

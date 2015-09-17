@@ -1,6 +1,7 @@
 package gov.va.oia.econgen;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -30,9 +31,10 @@ class EConceptDiffUtility  {
 	private List<TkRefexAbstractMember<?>> oldLangRefexSet = new ArrayList<TkRefexAbstractMember<?>>();
 	private List<TkRefexAbstractMember<?>> newLangRefexSet = new ArrayList<TkRefexAbstractMember<?>>();
 	
-	static long importTime = (new Date()).getTime();
+	static long newImportDate;
 	static boolean conceptChangeFound = false;
 	static List<TkRefexAbstractMember<?>> emptyAnnotations = new ArrayList<TkRefexAbstractMember<?>>();
+
 
 	protected List<TkIdentifier> handleIds(List<TkIdentifier> oldIds, List<TkIdentifier> newIds) {
 		List<TkIdentifier> diffIds = new ArrayList<TkIdentifier>();
@@ -75,6 +77,7 @@ class EConceptDiffUtility  {
 		try {
 			List<TkRefexAbstractMember<?>> diffRefsets = new ArrayList<TkRefexAbstractMember<?>>();
 	
+			/*
 			if(newRefsets != null) {
 	 			Iterator<TkRefexAbstractMember<?>> itr = newRefsets.iterator();
 	 
@@ -104,6 +107,7 @@ class EConceptDiffUtility  {
 					}
 				}
 			}			
+			*/
 			// Handle Retired Refsets (don't need to retire the annots' annots I think)
 			retireRefsets(oldRefsets, newRefsets, diffRefsets);
 			
@@ -235,7 +239,7 @@ class EConceptDiffUtility  {
 			List<TkRefexAbstractMember<?>> diffRefsets) {
 		List<TkRefexAbstractMember<?>> retRefsets = getRetiredRefsets(oldRefsets, newRefsets);
 
-		retireRefsets(retRefsets);
+		retireRefsets(retRefsets, newImportDate);
 		
 		diffRefsets.addAll(retRefsets);
 	}
@@ -268,7 +272,7 @@ class EConceptDiffUtility  {
 		return retiredList;
 	}
 
-	protected void retireRefsets(List<TkRefexAbstractMember<?>> refsets) {
+	protected void retireRefsets(List<TkRefexAbstractMember<?>> refsets, long retireTime) {
 		if (refsets != null) {
 			for (TkRefexAbstractMember refset : refsets) {
 				TkRevision rev = null;
@@ -311,7 +315,7 @@ class EConceptDiffUtility  {
 				
 				
 				rev.statusUuid = inactiveStatus;
-				rev.time = importTime;
+				rev.time = newImportDate;
 				rev.authorUuid = refset.authorUuid;
 				rev.moduleUuid = refset.moduleUuid;
 				rev.pathUuid = refset.pathUuid;
@@ -328,13 +332,13 @@ class EConceptDiffUtility  {
 		}
 	}
 	
-	protected TkDescription retireDesc(TkDescription oldDesc) {
+	protected TkDescription retireDesc(TkDescription oldDesc, long retireTime) {
 		TkDescription retDesc = new TkDescription();
 		
 		retDesc.primordialUuid = oldDesc.primordialUuid;
 		retDesc.conceptUuid = oldDesc.conceptUuid;
 		retDesc.statusUuid = inactiveStatus;
-		retDesc.time = importTime;
+		retDesc.time = retireTime;
 		retDesc.authorUuid = oldDesc.authorUuid;
 		retDesc.moduleUuid = oldDesc.moduleUuid;
 		retDesc.pathUuid = oldDesc.pathUuid;
@@ -343,17 +347,17 @@ class EConceptDiffUtility  {
 		retDesc.text = oldDesc.text;
 		retDesc.typeUuid = oldDesc.typeUuid;
 		
-		retireRefsets(retDesc.annotations);
+		retireRefsets(retDesc.annotations, retireTime);
 
 		return retDesc;
 	}
 
-	protected TkRelationship retireRel(TkRelationship oldRel) {
+	protected TkRelationship retireRel(TkRelationship oldRel, long retireTime) {
 		TkRelationship retRel = new TkRelationship();
 		
 		retRel.primordialUuid = oldRel.primordialUuid;
 		retRel.statusUuid = inactiveStatus;
-		retRel.time = importTime;
+		retRel.time = retireTime;
 		retRel.authorUuid = oldRel.authorUuid;
 		retRel.moduleUuid = oldRel.moduleUuid;
 		retRel.pathUuid = oldRel.pathUuid;
@@ -366,31 +370,31 @@ class EConceptDiffUtility  {
 		retRel.typeUuid = oldRel.typeUuid;
 		retRel.typeUuid = oldRel.typeUuid;
 		
-		retireRefsets(retRel.annotations);
+		retireRefsets(retRel.annotations, retireTime);
 
 		return retRel;
 	}
 
-	public void retireCon(EConcept oldCon) {
+	public void retireCon(EConcept oldCon, long retireTime) {
 		oldCon.getConceptAttributes().revisions = new ArrayList<TkConceptAttributesRevision>();
 		TkConceptAttributesRevision attrRev = new TkConceptAttributesRevision();
 
 		attrRev.statusUuid = inactiveStatus;
-		attrRev.time = importTime;
+		attrRev.time = retireTime;
 		attrRev.authorUuid = oldCon.conceptAttributes.authorUuid;
 		attrRev.moduleUuid = oldCon.conceptAttributes.moduleUuid;
 		attrRev.pathUuid = oldCon.conceptAttributes.pathUuid;
 		
 		oldCon.getConceptAttributes().revisions.add(attrRev);
 		
-		retireRefsets(oldCon.getConceptAttributes().annotations);
+		retireRefsets(oldCon.getConceptAttributes().annotations, retireTime);
 		
 		for (TkDescription desc : oldCon.getDescriptions()) {
-			retireDesc(desc);
+			retireDesc(desc, retireTime);
 		}
 			
 		for (TkRelationship desc : oldCon.getRelationships()) {
-			retireRel(desc);
+			retireRel(desc, retireTime);
 		}
 	}
 	
@@ -400,4 +404,19 @@ class EConceptDiffUtility  {
 	public List<TkRefexAbstractMember<?>> getNewLangRefexSet() {
 		return newLangRefexSet;
 	}
+
+
+
+	public long getNewImportDate() {
+		return newImportDate;
+	}
+	
+	public void setNewImportDate(int year, int month, int date) {
+		Calendar c = Calendar.getInstance();
+		c.set(year, month, date, 0, 0);  
+
+		newImportDate = c.getTimeInMillis();
+	}
+
+
 }
