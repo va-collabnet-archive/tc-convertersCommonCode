@@ -149,6 +149,28 @@ public class EConceptUtility
 		ConsoleUtil.println("The path to be specified in the workbench baseline pom (or assembly pom) is '" + pathName + "' - " + terminologyPathUUID_);
 	}
 
+	public EConceptUtility(String namespaceSeed, DataOutputStream dos, long defaultTime) throws Exception
+	{
+		ConverterUUID.addMapping("isA", isARelUuid_);
+		ConverterUUID.addMapping("Synonym", synonymUuid_);
+		ConverterUUID.addMapping("Fully Specified Name", fullySpecifiedNameUuid_);
+		ConverterUUID.addMapping("US English Refset", usEnRefsetUuid_);
+		ConverterUUID.addMapping("Path reference set", pathRefSetUUID_);
+		ConverterUUID.addMapping("Path origin reference set", pathOriginRefSetUUID_);
+		
+		defaultTime_ = defaultTime;
+		
+		UUID namespace = ConverterUUID.createNamespaceUUIDFromString(null, namespaceSeed);
+		ConverterUUID.configureNamespace(namespace);
+
+		String pathName = "JIF Terminology Workbench development path";
+		UUID pathUuid = UUID.fromString("944355c4-6eee-5fef-b8cc-fb0f500878ef"); // UUID for JIF Term WB Dev Path
+		
+		terminologyPathUUID_ = pathUuid;  //Now change the path to our new path concept
+ 
+		ConsoleUtil.println("The path to be specified in the workbench baseline pom (or assembly pom) is '" + pathName + "' - " + terminologyPathUUID_);
+	}
+
 	/**
 	 * Create a concept, automatically setting as many fields as possible (adds a description, calculates
 	 * the UUID, status current, etc)
