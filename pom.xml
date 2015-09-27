@@ -5,14 +5,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.va.oia.terminology.converters</groupId>
 	<artifactId>convertersCommonCode</artifactId>
-	<version>3.1</version>
+	<version>3.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
 	<name>Converters Common Code</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<wb-toolkit.version>2.32-trek-no-jini-va-1.33</wb-toolkit.version>
+		<wb-toolkit.version>2.32-trek-no-jini-va-1.34-SNAPSHOT</wb-toolkit.version>
 	</properties>
 
 	<scm>
